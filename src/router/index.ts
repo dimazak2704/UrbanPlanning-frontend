@@ -1,0 +1,203 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import type { Role } from '@/types/enums'
+import { useAuthStore } from '@/stores/auth.store'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    requiresRole?: Role | Role[]
+    layout?: 'default' | 'auth' | 'cabinet'
+    title?: string
+  }
+}
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    name: 'home',
+    component: () => import('@/pages/HomePage.vue'),
+    meta: { title: 'Головна' },
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/pages/LoginPage.vue'),
+    meta: { layout: 'auth', title: 'Вхід' },
+  },
+
+  // Cities
+  {
+    path: '/cities',
+    name: 'cities',
+    component: () => import('@/pages/cities/CitiesListPage.vue'),
+    meta: { title: 'Міста' },
+  },
+  {
+    path: '/cities/:id',
+    name: 'city-detail',
+    component: () => import('@/pages/cities/CityDetailPage.vue'),
+    meta: { title: 'Місто' },
+  },
+
+  // Districts
+  {
+    path: '/districts/:id',
+    name: 'district-detail',
+    component: () => import('@/pages/districts/DistrictDetailPage.vue'),
+    meta: { title: 'Район' },
+  },
+
+  // Projects
+  {
+    path: '/projects',
+    name: 'projects',
+    component: () => import('@/pages/projects/ProjectsListPage.vue'),
+    meta: { title: 'Проєкти' },
+  },
+  {
+    path: '/projects/new',
+    name: 'project-create',
+    component: () => import('@/pages/projects/ProjectEditPage.vue'),
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Новий проєкт' },
+  },
+  {
+    path: '/projects/:id/edit',
+    name: 'project-edit',
+    component: () => import('@/pages/projects/ProjectEditPage.vue'),
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Редагування проєкту' },
+  },
+  {
+    path: '/projects/:id',
+    name: 'project-detail',
+    component: () => import('@/pages/projects/ProjectDetailPage.vue'),
+    meta: { title: 'Проєкт' },
+  },
+
+  // Infrastructures
+  {
+    path: '/infrastructures',
+    name: 'infrastructures',
+    component: () => import('@/pages/infrastructures/InfrastructuresListPage.vue'),
+    meta: { title: 'Інфраструктура' },
+  },
+  {
+    path: '/infrastructures/new',
+    name: 'infrastructure-create',
+    component: () => import('@/pages/infrastructures/InfrastructureEditPage.vue'),
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Нова інфраструктура' },
+  },
+  {
+    path: '/infrastructures/:id/edit',
+    name: 'infrastructure-edit',
+    component: () => import('@/pages/infrastructures/InfrastructureEditPage.vue'),
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Редагування інфраструктури' },
+  },
+  {
+    path: '/infrastructures/:id',
+    name: 'infrastructure-detail',
+    component: () => import('@/pages/infrastructures/InfrastructureDetailPage.vue'),
+    meta: { title: 'Інфраструктура' },
+  },
+
+  // Architects
+  {
+    path: '/architects',
+    name: 'architects',
+    component: () => import('@/pages/architects/ArchitectsListPage.vue'),
+    meta: { title: 'Архітектори' },
+  },
+  {
+    path: '/architects/:id',
+    name: 'architect-detail',
+    component: () => import('@/pages/architects/ArchitectDetailPage.vue'),
+    meta: { title: 'Архітектор' },
+  },
+
+  // Map
+  {
+    path: '/map',
+    name: 'map',
+    component: () => import('@/pages/map/MapPage.vue'),
+    meta: { title: 'Карта' },
+  },
+
+  // Cabinet (me)
+  {
+    path: '/me',
+    name: 'my-dashboard',
+    component: () => import('@/pages/me/MyDashboardPage.vue'),
+    meta: { requiresAuth: true, layout: 'cabinet', title: 'Мій кабінет' },
+  },
+  {
+    path: '/me/projects',
+    name: 'my-projects',
+    component: () => import('@/pages/me/MyProjectsPage.vue'),
+    meta: { requiresAuth: true, layout: 'cabinet', title: 'Мої проєкти' },
+  },
+  {
+    path: '/me/profile',
+    name: 'my-profile',
+    component: () => import('@/pages/me/MyProfilePage.vue'),
+    meta: { requiresAuth: true, layout: 'cabinet', title: 'Мій профіль' },
+  },
+
+  // Admin
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: () => import('@/pages/admin/AdminUsersPage.vue'),
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'Користувачі' },
+  },
+  {
+    path: '/admin/cities',
+    name: 'admin-cities',
+    component: () => import('@/pages/admin/AdminCitiesPage.vue'),
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'Управління містами' },
+  },
+  {
+    path: '/admin/districts',
+    name: 'admin-districts',
+    component: () => import('@/pages/admin/AdminDistrictsPage.vue'),
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'Управління районами' },
+  },
+
+  // 404
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/pages/NotFoundPage.vue'),
+    meta: { title: 'Сторінку не знайдено' },
+  },
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior(_to, _from, savedPosition) {
+    return savedPosition || { top: 0 }
+  },
+})
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.meta.requiresRole && auth.user) {
+    const allowed = Array.isArray(to.meta.requiresRole)
+      ? to.meta.requiresRole
+      : [to.meta.requiresRole]
+    if (!allowed.includes(auth.user.role)) {
+      return { name: 'home' }
+    }
+  }
+
+  if (to.meta.title) {
+    document.title = `${to.meta.title} — УрбанПлан`
+  }
+})
+
+export default router
