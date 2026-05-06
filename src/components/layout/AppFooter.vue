@@ -1,70 +1,46 @@
 <script setup lang="ts">
-import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
 import { useI18n } from 'vue-i18n'
+
 const { t } = useI18n()
 </script>
 
 <template>
-  <footer class="border-t border-slate-800 bg-slate-900 text-slate-400">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <!-- About -->
-        <div>
-          <div class="flex items-center gap-2 mb-4">
-            <BuildingOffice2Icon class="h-6 w-6 text-primary-400" />
-            <span class="text-lg font-bold text-white">
-              Urban<span class="text-primary-400">Plan</span>
-            </span>
+  <footer class="border-t border-night-border bg-night text-paper/75">
+    <div class="container-app py-20">
+      <p class="border-b border-night-border pb-10 font-serif text-5xl font-light tracking-tight text-paper md:text-7xl">
+        Urban Planning Platform
+      </p>
+
+      <div class="grid grid-cols-1 gap-10 py-10 text-center md:grid-cols-3">
+        <div class="mx-auto">
+          <p class="mb-4 text-xs font-mono uppercase tracking-[0.2em] text-paper/55">{{ t('footer.links') }}</p>
+          <div class="space-y-3">
+            <RouterLink to="/cities" class="block link-underline text-base text-paper">{{ t('header.cities') }}</RouterLink>
+            <RouterLink to="/projects" class="block link-underline text-base text-paper">{{ t('header.projects') }}</RouterLink>
+            <RouterLink to="/map" class="block link-underline text-base text-paper">{{ t('header.map') }}</RouterLink>
+            <RouterLink to="/architects" class="block link-underline text-base text-paper">{{ t('header.architects') }}</RouterLink>
           </div>
-          <p class="text-sm leading-relaxed">
-            {{ t('footer.description') }}
+        </div>
+
+        <div class="mx-auto">
+          <p class="mb-4 text-xs font-mono uppercase tracking-[0.2em] text-paper/55">{{ t('footer.contacts') }}</p>
+          <div class="space-y-3 text-base text-paper">
+            <p>admin@urbanplan.ua</p>
+            <p>+380 44 123 45 67</p>
+            <p>{{ t('footer.location') }}</p>
+          </div>
+        </div>
+
+        <div class="mx-auto">
+          <p class="mb-4 text-xs font-mono uppercase tracking-[0.2em] text-paper/55">{{ t('footer.description') }}</p>
+          <p class="max-w-sm text-base leading-relaxed text-paper/75">
+            {{ t('home.heroDescription') }}
           </p>
-        </div>
-
-        <!-- Links -->
-        <div>
-          <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-300">
-            {{ t('footer.links') }}
-          </h3>
-          <ul class="space-y-2.5">
-            <li>
-              <RouterLink to="/cities" class="text-sm hover:text-white transition-colors">
-                {{ t('header.cities') }}
-              </RouterLink>
-            </li>
-            <li>
-              <RouterLink to="/projects" class="text-sm hover:text-white transition-colors">
-                {{ t('header.projects') }}
-              </RouterLink>
-            </li>
-            <li>
-              <RouterLink to="/map" class="text-sm hover:text-white transition-colors">
-                {{ t('header.map') }}
-              </RouterLink>
-            </li>
-            <li>
-              <RouterLink to="/architects" class="text-sm hover:text-white transition-colors">
-                {{ t('header.architects') }}
-              </RouterLink>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Contacts -->
-        <div>
-          <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-300">
-            {{ t('footer.contacts') }}
-          </h3>
-          <ul class="space-y-2.5 text-sm">
-            <li>📧 admin@urbanplan.ua</li>
-            <li>📞 +380 44 123 45 67</li>
-            <li>📍 {{ t('footer.location') }}</li>
-          </ul>
         </div>
       </div>
 
-      <div class="mt-10 border-t border-slate-800 pt-6 text-center text-sm text-slate-500">
-        © {{ new Date().getFullYear() }} UrbanPlan.
+      <div class="border-t border-night-border pt-6 text-xs font-mono uppercase tracking-[0.2em] text-paper/50">
+        © {{ new Date().getFullYear() }} UrbanPlan · v1.0.0
       </div>
     </div>
   </footer>

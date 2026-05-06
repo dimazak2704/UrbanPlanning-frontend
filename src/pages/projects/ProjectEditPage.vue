@@ -16,7 +16,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { PROJECT_STATUS_LABELS } from '@/utils/enum-labels'
 import type { ProjectCreateRequest } from '@/types/project'
-import type { ProjectStatus } from '@/types/enums'
+import { PROJECT_STATUS_VALUES, type ProjectStatus } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -34,7 +34,9 @@ const location = ref<{ lat: number; lng: number } | null>(null)
 const cityOptions = ref<{ value: number; label: string }[]>([])
 const districtOptions = ref<{ value: number; label: string }[]>([])
 const architectOptions = ref<{ value: number; label: string }[]>([])
-const statusOptions = computed(() => Object.entries(PROJECT_STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })))
+const statusOptions = computed(() =>
+  PROJECT_STATUS_VALUES.map((value) => ({ value, label: PROJECT_STATUS_LABELS[value] })),
+)
 
 const errors = ref<Record<string, string>>({})
 
@@ -44,6 +46,7 @@ function validate(): boolean {
   else if (form.value.name.length > 150) errors.value.name = t('validation.maxLength', { max: 150 })
   if (!form.value.districtId) errors.value.districtId = t('validation.required')
   if (!form.value.status) errors.value.status = t('validation.required')
+  if (form.value.budget <= 0) errors.value.budget = t('validation.minValue', { min: 1 })
   if (form.value.endDate && form.value.startDate && form.value.endDate < form.value.startDate) errors.value.endDate = t('validation.endDateBeforeStart')
   return Object.keys(errors.value).length === 0
 }
@@ -94,33 +97,33 @@ onMounted(async () => {
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-slate-900 mb-8">{{ isEdit ? t('projects.editProject') : t('projects.newProject') }}</h1>
+    <h1 class="mb-8 text-3xl font-bold text-ink dark:text-paper">{{ isEdit ? t('projects.editProject') : t('projects.newProject') }}</h1>
     <LoadingSpinner v-if="loading" />
     <form v-else @submit.prevent="onSubmit" class="space-y-6">
-      <BaseInput v-model="form.name" :label="t('projects.form.name') + ' *'" :placeholder="t('projects.searchByName')" :error="errors.name" />
+      <BaseInput v-model="form.name" :label="t('projects.form.name')" required :placeholder="t('projects.searchByName')" :error="errors.name" />
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <BaseSelect v-model="form.cityId" :options="cityOptions" :label="t('cities.cityName') + ' *'" :placeholder="t('projects.allCities')" />
-        <BaseSelect v-model="form.districtId" :options="districtOptions" :label="t('districts.districtName') + ' *'" placeholder="..." :error="errors.districtId" :disabled="!form.cityId" />
+        <BaseSelect v-model="form.cityId" :options="cityOptions" :label="t('cities.cityName')" :placeholder="t('projects.allCities')" />
+        <BaseSelect v-model="form.districtId" :options="districtOptions" :label="t('districts.districtName')" placeholder="..." :error="errors.districtId" :disabled="!form.cityId" />
       </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <BaseSelect v-model="form.status" :options="statusOptions" :label="t('projects.form.status') + ' *'" :error="errors.status" />
-        <BaseInput v-model="form.budget" :label="t('projects.form.budget')" type="number" placeholder="0" />
+        <BaseSelect v-model="form.status" :options="statusOptions" :label="t('projects.form.status')" :error="errors.status" />
+        <BaseInput v-model="form.budget" :label="t('projects.form.budget')" type="number" min="1" placeholder="1" :error="errors.budget" />
       </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <BaseInput v-model="form.startDate" :label="t('projects.form.startDate')" type="date" />
         <BaseInput v-model="form.endDate" :label="t('projects.form.endDate')" type="date" :error="errors.endDate" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('projects.form.description') }}</label>
+        <label class="mb-1 block text-sm font-medium text-ink dark:text-paper">{{ t('projects.form.description') }}</label>
         <textarea v-model="form.description" rows="5" maxlength="5000"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none resize-none" />
-        <p class="mt-1 text-xs text-slate-400 text-right">{{ form.description.length }} / 5000</p>
+          class="w-full resize-none rounded-lg border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-paper/30 dark:text-paper" />
+        <p class="mt-1 text-right text-xs text-ink-subtle dark:text-paper/45">{{ form.description.length }} / 5000</p>
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('projects.form.photo') }}</label>
+        <label class="mb-2 block text-sm font-medium text-ink dark:text-paper">{{ t('projects.form.photo') }}</label>
         <ImageUploader v-model="form.imageUrl" endpoint="projects" />
       </div>
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+      <div class="flex justify-end gap-3 border-t border-ink/10 pt-4 dark:border-night-border">
         <BaseButton variant="secondary" type="button" @click="router.back()">{{ t('common.cancel') }}</BaseButton>
         <BaseButton type="submit" :disabled="saving">{{ t('common.save') }}</BaseButton>
       </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { resolveMediaUrl } from '@/utils/media-url'
 
 interface Props {
   src?: string | null
@@ -14,7 +15,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const hasError = ref(false)
-const showFallback = computed(() => !props.src || hasError.value)
+const resolvedSrc = computed(() => resolveMediaUrl(props.src))
+const showFallback = computed(() => !resolvedSrc.value || hasError.value)
 
 function onError() {
   hasError.value = true
@@ -25,7 +27,7 @@ function onError() {
   <div class="relative overflow-hidden" :class="fallbackClass">
     <img
       v-if="!showFallback"
-      :src="src!"
+      :src="resolvedSrc!"
       :alt="alt"
       class="h-full w-full object-cover"
       @error="onError"

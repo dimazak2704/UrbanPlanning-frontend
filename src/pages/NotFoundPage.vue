@@ -1,25 +1,23 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { HomeIcon } from '@heroicons/vue/24/outline'
+import { PhArrowLeft } from '@phosphor-icons/vue'
 
 const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-    <div class="mb-6 rounded-full bg-slate-100 p-4">
-      <svg class="h-16 w-16 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-      </svg>
+  <div class="container-app flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
+    <div class="mb-8 border border-ink/15 px-6 py-3 text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:border-paper/25 dark:text-paper/65">
+      404 / ROUTE_MISSING
     </div>
-    <h1 class="text-3xl font-bold text-slate-900 mb-3">404</h1>
-    <p class="text-lg text-slate-500 mb-8">{{ t('errors.pageNotFound') }}</p>
+    <h1 class="mb-3 font-serif text-7xl font-light tracking-tight text-ink dark:text-paper">404</h1>
+    <p class="mb-10 text-base leading-relaxed text-ink-muted dark:text-paper/70">{{ t('errors.pageNotFound') }}</p>
     <RouterLink
       to="/"
-      class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700"
+      class="inline-flex items-center gap-2 border border-ink bg-ink px-8 py-4 text-sm font-mono uppercase tracking-wider text-paper transition-colors hover:bg-accent hover:border-accent dark:border-paper dark:bg-paper dark:text-night"
     >
-      <HomeIcon class="h-4 w-4" />
+      <PhArrowLeft :size="14" weight="light" />
       {{ t('header.home') }}
     </RouterLink>
   </div>

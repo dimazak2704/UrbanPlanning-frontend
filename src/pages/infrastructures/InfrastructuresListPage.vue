@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { PlusIcon } from '@heroicons/vue/24/outline'
+import { PhPlus } from '@phosphor-icons/vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import InfrastructureCard from '@/components/cards/InfrastructureCard.vue'
@@ -19,6 +19,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { INFRASTRUCTURE_TYPE_LABELS, INFRASTRUCTURE_STATUS_LABELS } from '@/utils/enum-labels'
 import type { Infrastructure, InfrastructureFilters } from '@/types/infrastructure'
+import { INFRASTRUCTURE_STATUS_VALUES, INFRASTRUCTURE_TYPE_VALUES } from '@/types/enums'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -29,8 +30,12 @@ const pagination = usePagination({ defaultSize: 12 })
 const sort = ref('name,asc')
 const items = ref<Infrastructure[]>([])
 const cityOptions = ref<{ value: number; label: string }[]>([])
-const typeOptions = computed(() => Object.entries(INFRASTRUCTURE_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l })))
-const statusOptions = computed(() => Object.entries(INFRASTRUCTURE_STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })))
+const typeOptions = computed(() =>
+  INFRASTRUCTURE_TYPE_VALUES.map((value) => ({ value, label: INFRASTRUCTURE_TYPE_LABELS[value] })),
+)
+const statusOptions = computed(() =>
+  INFRASTRUCTURE_STATUS_VALUES.map((value) => ({ value, label: INFRASTRUCTURE_STATUS_LABELS[value] })),
+)
 const sortOptions = computed(() => [
   { value: 'name,asc', label: t('cities.sortNameAsc') }, { value: 'name,desc', label: t('cities.sortNameDesc') },
   { value: 'budget,desc', label: t('projects.sortBudgetDesc') }, { value: 'budget,asc', label: t('projects.sortBudgetAsc') },
@@ -57,21 +62,22 @@ watch(() => pagination.size.value, fetchItems)
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+  <div class="container-app py-12 md:py-16">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">{{ t('infrastructures.title') }}</h1>
-        <p class="mt-1 text-sm text-slate-500">{{ t('infrastructures.totalCount', { count: pagination.totalElements.value }) }}</p>
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">— 05 INFRASTRUCTURE</p>
+        <h1 class="mt-2 text-4xl font-serif font-medium tracking-tight">{{ t('infrastructures.title') }}</h1>
+        <p class="mt-2 text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('infrastructures.totalCount', { count: pagination.totalElements.value }) }}</p>
       </div>
       <div class="flex items-center gap-3">
         <div class="w-48"><SortSelect v-model="sort" :options="sortOptions" /></div>
         <RouterLink v-if="auth.isAuthenticated" to="/infrastructures/new"
-          class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 transition-all">
-          <PlusIcon class="h-4 w-4" /> {{ t('infrastructures.addInfrastructure') }}
+          class="inline-flex items-center gap-2 border border-ink bg-ink px-6 py-3 text-xs font-mono uppercase tracking-wider text-paper transition-colors hover:border-accent hover:bg-accent dark:border-paper dark:bg-paper dark:text-night">
+          <PhPlus :size="14" weight="light" /> {{ t('infrastructures.addInfrastructure') }}
         </RouterLink>
       </div>
     </div>
-    <div class="mb-6">
+    <div class="mb-8">
       <FilterPanel :has-active-filters="hasActiveFilters" @clear="clearFilters">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <BaseInput v-model="filters.name" :label="t('infrastructures.form.name')" :placeholder="t('cities.searchByName')" />
@@ -81,9 +87,9 @@ watch(() => pagination.size.value, fetchItems)
         </div>
       </FilterPanel>
     </div>
-    <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"><SkeletonCard v-for="i in 6" :key="i" /></div>
+    <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"><SkeletonCard v-for="i in 6" :key="i" /></div>
     <EmptyState v-else-if="items.length === 0" :title="t('infrastructures.notFound')" />
-    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       <InfrastructureCard v-for="item in items" :key="item.id" :infrastructure="item" />
     </div>
     <div v-if="!pagination.loading.value && items.length > 0" class="mt-8">

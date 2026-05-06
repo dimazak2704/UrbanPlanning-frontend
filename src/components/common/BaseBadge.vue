@@ -12,15 +12,15 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const variantClasses: Record<string, string> = {
-  slate: 'bg-slate-100 text-slate-700',
-  blue: 'bg-blue-100 text-blue-700',
-  amber: 'bg-amber-100 text-amber-700',
-  emerald: 'bg-emerald-100 text-emerald-700',
-  red: 'bg-red-100 text-red-700',
-  indigo: 'bg-indigo-100 text-indigo-700',
-  teal: 'bg-teal-100 text-teal-700',
-  orange: 'bg-orange-100 text-orange-700',
-  purple: 'bg-purple-100 text-purple-700',
+  slate: 'border-ink/20 text-ink-muted dark:border-paper/25 dark:text-paper/65',
+  blue: 'border-status-approved/35 text-status-approved',
+  amber: 'border-status-construction/35 text-status-construction',
+  emerald: 'border-status-completed/35 text-status-completed',
+  red: 'border-status-suspended/35 text-status-suspended',
+  indigo: 'border-ink/20 text-ink-muted dark:border-paper/25 dark:text-paper/65',
+  teal: 'border-status-approved/35 text-status-approved',
+  orange: 'border-status-construction/35 text-status-construction',
+  purple: 'border-ink/20 text-ink-muted dark:border-paper/25 dark:text-paper/65',
 }
 
 const classes = computed(() =>
@@ -31,7 +31,7 @@ const classes = computed(() =>
 <template>
   <span
     :class="[
-      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+      'inline-flex items-center border px-2.5 py-1 text-xs font-mono uppercase tracking-widest',
       classes,
     ]"
   >

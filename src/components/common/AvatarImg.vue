@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { PhUser } from '@phosphor-icons/vue'
+import { resolveMediaUrl } from '@/utils/media-url'
 
 interface Props {
   src?: string | null
@@ -13,54 +15,42 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const sizeClasses: Record<string, string> = {
-  sm: 'h-8 w-8 text-xs',
-  md: 'h-10 w-10 text-sm',
-  lg: 'h-12 w-12 text-base',
-  xl: 'h-16 w-16 text-lg',
+  sm: 'h-8 w-8 text-[10px]',
+  md: 'h-10 w-10 text-xs',
+  lg: 'h-12 w-12 text-sm',
+  xl: 'h-16 w-16 text-base',
 }
 
 const sizeClass = computed(() => sizeClasses[props.size])
 
 const imgError = ref(false)
-const showImage = computed(() => !!props.src && !imgError.value)
+const resolvedSrc = computed(() => resolveMediaUrl(props.src))
+const showImage = computed(() => !!resolvedSrc.value && !imgError.value)
 
 // Reset error state when src changes
 import { watch } from 'vue'
 watch(() => props.src, () => { imgError.value = false })
 
 const initials = computed(() => {
-  const parts = props.name.trim().split(/\s+/)
+  const safeName = props.name.trim()
+  if (!safeName) {
+    return ''
+  }
+
+  const parts = safeName.split(/\s+/)
   if (parts.length >= 2) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
   }
-  return props.name.slice(0, 2).toUpperCase()
+  return safeName.slice(0, 2).toUpperCase()
 })
 
-const gradientColors = [
-  'from-primary-500 to-primary-600',
-  'from-accent-500 to-accent-600',
-  'from-emerald-500 to-emerald-600',
-  'from-amber-500 to-amber-600',
-  'from-rose-500 to-rose-600',
-  'from-violet-500 to-violet-600',
-  'from-cyan-500 to-cyan-600',
-  'from-fuchsia-500 to-fuchsia-600',
-]
-
-const gradientClass = computed(() => {
-  let hash = 0
-  for (let i = 0; i < props.name.length; i++) {
-    hash = props.name.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return gradientColors[Math.abs(hash) % gradientColors.length]
-})
 </script>
 
 <template>
-  <div :class="['relative shrink-0 rounded-full overflow-hidden', sizeClass]">
+  <div :class="['relative shrink-0 overflow-hidden border border-ink/15 bg-paper-warm dark:border-night-border dark:bg-night-elevated', sizeClass]">
     <img
       v-if="showImage"
-      :src="src!"
+      :src="resolvedSrc!"
       :alt="name"
       class="h-full w-full object-cover"
       @error="imgError = true"
@@ -68,11 +58,11 @@ const gradientClass = computed(() => {
     <div
       v-if="!showImage"
       :class="[
-        'flex h-full w-full items-center justify-center bg-gradient-to-br font-semibold text-white',
-        gradientClass,
+        'flex h-full w-full items-center justify-center bg-paper-warm font-mono text-ink-muted dark:bg-night-elevated dark:text-paper/60',
       ]"
     >
-      {{ initials }}
+      <span v-if="initials">{{ initials }}</span>
+      <PhUser v-else :size="16" weight="light" />
     </div>
   </div>
 </template>

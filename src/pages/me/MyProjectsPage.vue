@@ -11,7 +11,7 @@ import FilterPanel from '@/components/tables/FilterPanel.vue'
 import Pagination from '@/components/tables/Pagination.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmptyState from '@/components/tables/EmptyState.vue'
-import { PlusIcon } from '@heroicons/vue/24/outline'
+import { PhPlus } from '@phosphor-icons/vue'
 
 import { getMyProjects, deleteProject } from '@/api/projects.api'
 import { usePagination } from '@/composables/usePagination'
@@ -40,17 +40,23 @@ const filters = ref<ProjectFilters>({
   startDateTo: '',
 })
 
-const { page, totalPages, totalElements, updatePage, setTotal } = usePagination(0)
-const debouncedFilters = useDebounce(filters.value, 500)
+const pagination = usePagination({ defaultSize: 9 })
+const debouncedFilters = useDebounce(filters, 500)
 
 const projectToDelete = ref<Project | null>(null)
 
 async function fetchProjects() {
   loading.value = true
   try {
-    const { data } = await getMyProjects(debouncedFilters.value, { page: page.value, size: 9, sort: 'updatedAt,desc' })
+    const preparedFilters: ProjectFilters = {
+      ...debouncedFilters.value,
+      startDateFrom: debouncedFilters.value.startDateFrom || undefined,
+      startDateTo: debouncedFilters.value.startDateTo || undefined,
+      name: debouncedFilters.value.name?.trim() || undefined,
+    }
+    const { data } = await getMyProjects(preparedFilters, { page: pagination.page.value, size: pagination.size.value, sort: 'updatedAt,desc' })
     projects.value = data.content
-    setTotal(data.totalElements, data.totalPages)
+    pagination.updateFromResponse(data)
   } catch (err) {
     toast.error(t('projects.loadError'))
   } finally {
@@ -58,10 +64,12 @@ async function fetchProjects() {
   }
 }
 
-watch([debouncedFilters, page], fetchProjects)
+watch([debouncedFilters], () => { pagination.page.value = 0; fetchProjects() }, { deep: true })
+watch(() => pagination.page.value, fetchProjects)
+watch(() => pagination.size.value, fetchProjects)
 
 function onFilterChange() {
-  page.value = 0
+  pagination.page.value = 0
 }
 
 watch(filters, onFilterChange, { deep: true })
@@ -83,7 +91,7 @@ async function confirmDelete() {
   try {
     await deleteProject(projectToDelete.value.id)
     toast.success(t('projects.deleteSuccess'))
-    if (projects.value.length === 1 && page.value > 0) page.value--
+    if (projects.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchProjects()
   } catch (err) {
     toast.error(t('projects.deleteError'))
@@ -94,18 +102,21 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="min-h-[calc(100vh-260px)] space-y-8 pb-10">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-slate-900">{{ t('me.myProjects') }}</h1>
-      <BaseButton @click="router.push('/projects/new')"><template #iconLeft><PlusIcon class="h-4 w-4" /></template>{{ t('projects.newProject') }}</BaseButton>
+      <h1 class="font-serif text-4xl font-medium tracking-tight text-ink dark:text-paper">{{ t('me.myProjects') }}</h1>
+      <BaseButton @click="router.push('/projects/new')"><template #iconLeft><PhPlus :size="14" weight="light" /></template>{{ t('projects.newProject') }}</BaseButton>
     </div>
 
-    <FilterPanel @reset="filters = { name: '', status: undefined, startDateFrom: '', startDateTo: '' }">
+    <FilterPanel
+      :has-active-filters="Boolean(filters.name || filters.status || filters.startDateFrom || filters.startDateTo)"
+      @clear="filters = { name: '', status: undefined, startDateFrom: '', startDateTo: '' }"
+    >
       <BaseInput v-model="filters.name" :placeholder="t('projects.searchByName')" />
       <BaseSelect v-model="filters.status" :options="statusOptions" :placeholder="t('common.all')" />
-      <div class="flex gap-2">
-        <BaseInput v-model="filters.startDateFrom" type="date" :placeholder="t('common.from')" />
-        <BaseInput v-model="filters.startDateTo" type="date" :placeholder="t('common.to')" />
+      <div class="mt-1 flex gap-2">
+        <BaseInput v-model="filters.startDateFrom" type="date" :label="t('projects.dateFrom')" />
+        <BaseInput v-model="filters.startDateTo" type="date" :label="t('projects.dateTo')" />
       </div>
     </FilterPanel>
 
@@ -116,10 +127,10 @@ async function confirmDelete() {
       <EmptyState :title="t('projects.notFound')" :description="t('projects.notFoundDescription')" />
     </div>
     <div v-else>
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+      <div class="mb-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <ProjectCard v-for="p in projects" :key="p.id" :project="p" showActions @edit="onEdit" @delete="askDelete" />
       </div>
-      <Pagination :current-page="page" :total-pages="totalPages" :total-elements="totalElements" :page-size="9" @update:page="updatePage" />
+      <Pagination :current-page="pagination.page.value" :total-pages="pagination.totalPages.value" :total-elements="pagination.totalElements.value" :page-size="pagination.size.value" @update:page="pagination.setPage" @update:size="pagination.setSize" />
     </div>
 
     <ConfirmDialog

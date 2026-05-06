@@ -8,7 +8,7 @@ import {
   getInfrastructureStatusColor,
 } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
-import { FolderIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { PhArrowRight, PhFolder } from '@phosphor-icons/vue'
 
 interface Props {
   infrastructure: Infrastructure
@@ -30,22 +30,22 @@ const typeVariantMap: Record<string, string> = {
 <template>
   <RouterLink
     :to="`/infrastructures/${infrastructure.id}`"
-    class="group block rounded-xl border border-slate-200 bg-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:border-primary-200 hover:-translate-y-0.5"
+    class="card-unified group"
   >
     <ImageWithFallback
       :src="infrastructure.imageUrl"
       :alt="infrastructure.name"
-      fallback-class="h-40 w-full"
+      fallback-class="h-56 w-full"
     />
 
-    <div class="p-5">
-      <div class="flex items-start justify-between gap-2 mb-3">
-        <h3 class="text-base font-semibold text-slate-900 line-clamp-1 group-hover:text-primary-700 transition-colors">
+    <div class="space-y-4 p-6">
+      <div class="flex items-start justify-between gap-2">
+        <h3 class="line-clamp-2 font-serif text-xl font-medium tracking-tight text-ink transition-colors group-hover:text-accent dark:text-paper">
           {{ infrastructure.name }}
         </h3>
       </div>
 
-      <div class="flex flex-wrap gap-1.5 mb-3">
+      <div class="flex flex-wrap gap-2 border-t border-ink/10 pt-3 dark:border-night-border">
         <BaseBadge :variant="(typeVariantMap[infrastructure.type] || 'slate') as 'slate'">
           {{ t(`enums.infrastructureType.${infrastructure.type}`) }}
         </BaseBadge>
@@ -54,20 +54,20 @@ const typeVariantMap: Record<string, string> = {
         </BaseBadge>
       </div>
 
-      <div class="space-y-1.5 text-sm text-slate-500">
-        <div class="flex items-center gap-1.5">
-          <FolderIcon class="h-4 w-4 shrink-0 text-slate-400" />
+      <div class="space-y-1.5 text-sm text-ink-muted dark:text-paper/70">
+        <div class="flex items-center gap-2">
+          <PhFolder :size="15" weight="light" class="shrink-0" />
           <span class="truncate">{{ infrastructure.projectName }}</span>
         </div>
       </div>
 
-      <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-        <span class="text-sm font-semibold text-slate-900">
+      <div class="flex items-center justify-between border-t border-ink/10 pt-4 dark:border-night-border">
+        <span class="text-sm font-mono uppercase tracking-wider text-ink dark:text-paper">
           {{ formatCurrency(infrastructure.budget) }}
         </span>
-        <span class="flex items-center gap-1 text-xs font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span class="flex items-center gap-1 text-xs font-mono uppercase tracking-[0.14em] text-ink-muted opacity-0 transition-opacity group-hover:opacity-100 dark:text-paper/65">
           {{ t('common.details') }}
-          <ArrowRightIcon class="h-3.5 w-3.5" />
+          <PhArrowRight :size="12" weight="light" />
         </span>
       </div>
     </div>

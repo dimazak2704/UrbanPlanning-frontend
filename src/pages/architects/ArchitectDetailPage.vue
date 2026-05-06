@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ChevronRightIcon, BriefcaseIcon, EnvelopeIcon, CalendarIcon } from '@heroicons/vue/24/outline'
+import { PhBriefcase, PhCalendar, PhCaretRight, PhEnvelopeSimple } from '@phosphor-icons/vue'
 import AvatarImg from '@/components/common/AvatarImg.vue'
 import ProjectCard from '@/components/cards/ProjectCard.vue'
 import EmptyState from '@/components/tables/EmptyState.vue'
@@ -46,48 +46,48 @@ onMounted(async () => { await fetchArchitect(); fetchProjects() })
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="container-app min-h-[calc(100vh-220px)] py-10">
     <LoadingSpinner v-if="loading" size="lg" />
     <template v-else-if="architect">
-      <div class="sticky top-16 z-40 -mx-4 px-4 py-3 bg-slate-50/90 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mb-6 border-b border-slate-200">
-        <nav class="flex items-center gap-1.5 text-sm text-slate-500 flex-wrap">
-          <RouterLink to="/" class="hover:text-slate-700">{{ t('header.home') }}</RouterLink>
-          <ChevronRightIcon class="h-3.5 w-3.5" />
-          <RouterLink to="/architects" class="hover:text-slate-700">{{ t('header.architects') }}</RouterLink>
-          <ChevronRightIcon class="h-3.5 w-3.5" />
-          <span class="text-slate-900 font-medium">{{ architect.fullName }}</span>
+      <div class="sticky top-16 z-40 -mx-4 mb-6 border-b border-ink/10 bg-paper/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 dark:border-night-border dark:bg-night-soft/90">
+        <nav class="flex items-center gap-1.5 text-sm text-ink-muted dark:text-paper/65 flex-wrap">
+          <RouterLink to="/" class="hover:text-ink dark:hover:text-paper">{{ t('header.home') }}</RouterLink>
+          <PhCaretRight :size="12" weight="light" />
+          <RouterLink to="/architects" class="hover:text-ink dark:hover:text-paper">{{ t('header.architects') }}</RouterLink>
+          <PhCaretRight :size="12" weight="light" />
+          <span class="font-medium text-ink dark:text-paper">{{ architect.fullName }}</span>
         </nav>
       </div>
 
       <!-- Profile -->
-      <div class="rounded-xl border border-slate-200 bg-white p-6 sm:p-8 mb-8">
+      <div class="mb-8 rounded-xl border border-ink/15 bg-paper-pure p-6 sm:p-8 dark:border-night-border dark:bg-night-soft">
         <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
           <AvatarImg :src="architect.avatarUrl" :name="architect.fullName" size="xl" />
           <div class="text-center sm:text-left flex-1">
-            <h1 class="text-3xl font-bold text-slate-900">{{ architect.fullName }}</h1>
-            <p class="mt-1 text-lg text-slate-500">{{ architect.specialization }}</p>
+            <h1 class="text-3xl font-bold text-ink dark:text-paper">{{ architect.fullName }}</h1>
+            <p class="mt-1 text-lg text-ink-muted dark:text-paper/65">{{ architect.specialization }}</p>
             <div class="mt-4 flex flex-wrap gap-4 justify-center sm:justify-start">
-              <div class="flex items-center gap-2 text-sm text-slate-600">
-                <BriefcaseIcon class="h-4 w-4 text-slate-400" /> {{ architect.experienceYears }} {{ t('common.years') }}
+              <div class="flex items-center gap-2 text-sm text-ink-muted dark:text-paper/70">
+                <PhBriefcase :size="14" weight="light" class="text-ink-subtle dark:text-paper/45" /> {{ architect.experienceYears }} {{ t('common.years') }}
               </div>
-              <div class="flex items-center gap-2 text-sm text-slate-600">
-                <EnvelopeIcon class="h-4 w-4 text-slate-400" /> {{ architect.email }}
+              <div class="flex items-center gap-2 text-sm text-ink-muted dark:text-paper/70">
+                <PhEnvelopeSimple :size="14" weight="light" class="text-ink-subtle dark:text-paper/45" /> {{ architect.email }}
               </div>
-              <div class="flex items-center gap-2 text-sm text-slate-600">
-                <CalendarIcon class="h-4 w-4 text-slate-400" /> {{ t('common.from') }} {{ formatDate(architect.createdAt) }}
+              <div class="flex items-center gap-2 text-sm text-ink-muted dark:text-paper/70">
+                <PhCalendar :size="14" weight="light" class="text-ink-subtle dark:text-paper/45" /> {{ t('common.from') }} {{ formatDate(architect.createdAt) }}
               </div>
             </div>
           </div>
           <div class="text-center">
             <p class="text-3xl font-bold text-primary-600">{{ architect.projectsCount }}</p>
-            <p class="text-sm text-slate-500">{{ t('architects.projectsCount') }}</p>
+            <p class="text-sm text-ink-muted dark:text-paper/65">{{ t('architects.projectsCount') }}</p>
           </div>
         </div>
       </div>
 
       <!-- Projects -->
       <div>
-        <h2 class="text-xl font-semibold text-slate-900 mb-4">{{ t('architects.projects', { count: projTotalElements }) }}</h2>
+        <h2 class="mb-4 text-xl font-semibold text-ink dark:text-paper">{{ t('architects.projects', { count: projTotalElements }) }}</h2>
         <EmptyState v-if="projects.length === 0" :title="t('projects.notFound')" />
         <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <ProjectCard v-for="p in projects" :key="p.id" :project="p" />

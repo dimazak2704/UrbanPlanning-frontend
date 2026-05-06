@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { FunnelIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/outline'
+import { PhCaretDown, PhCaretUp, PhFunnelSimple, PhX } from '@phosphor-icons/vue'
 
 interface Props {
   hasActiveFilters?: boolean
@@ -24,29 +24,30 @@ function toggle() {
 </script>
 
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+  <div class="border border-ink/10 bg-paper-pure dark:border-night-border dark:bg-night-soft">
+    <div class="flex items-center justify-between border-b border-ink/10 px-5 py-4 dark:border-night-border">
       <button
-        class="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
+        class="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.18em] text-ink-muted transition-colors hover:text-ink dark:text-paper/65 dark:hover:text-paper"
         @click="toggle"
       >
-        <FunnelIcon class="h-4 w-4 text-slate-400" />
+        <PhFunnelSimple :size="14" weight="light" />
         {{ t('map.filters') }}
         <span
           v-if="hasActiveFilters"
-          class="flex h-2 w-2 rounded-full bg-primary-500"
+          class="flex h-1.5 w-1.5 bg-accent"
         />
         <component
-          :is="expanded ? ChevronUpIcon : ChevronDownIcon"
-          class="h-4 w-4 text-slate-400"
+          :is="expanded ? PhCaretUp : PhCaretDown"
+          :size="14"
+          weight="light"
         />
       </button>
       <button
         v-if="hasActiveFilters"
-        class="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+        class="flex items-center gap-1.5 border border-ink/15 px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-ink-muted transition-colors hover:border-ink hover:text-ink dark:border-paper/30 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper"
         @click="emit('clear')"
       >
-        <XMarkIcon class="h-3.5 w-3.5" />
+        <PhX :size="12" weight="light" />
         {{ t('forms.filterReset') }}
       </button>
     </div>
@@ -58,7 +59,7 @@ function toggle() {
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-1"
     >
-      <div v-if="expanded" class="p-4">
+      <div v-if="expanded" class="p-5">
         <slot />
       </div>
     </transition>

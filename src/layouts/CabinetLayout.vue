@@ -7,13 +7,13 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import {
-  HomeIcon,
-  FolderIcon,
-  UserCircleIcon,
-  UsersIcon,
-  BuildingOffice2Icon,
-  MapIcon,
-} from '@heroicons/vue/24/outline'
+  PhBuildings,
+  PhFolder,
+  PhHouse,
+  PhMapPin,
+  PhUser,
+  PhUsersThree,
+} from '@phosphor-icons/vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -22,25 +22,25 @@ const { t } = useI18n()
 interface SidebarItem {
   label: string
   to: string
-  icon: typeof HomeIcon
+  icon: unknown
 }
 
 const cabinetLinks = computed<SidebarItem[]>(() => {
   const links: SidebarItem[] = [
-    { label: t('me.dashboard'), to: '/me', icon: HomeIcon },
+    { label: t('me.dashboard'), to: '/me', icon: PhHouse },
   ]
 
   if (auth.isArchitect) {
-    links.push({ label: t('me.myProjects'), to: '/me/projects', icon: FolderIcon })
+    links.push({ label: t('me.myProjects'), to: '/me/projects', icon: PhFolder })
   }
 
-  links.push({ label: t('me.profile'), to: '/me/profile', icon: UserCircleIcon })
+  links.push({ label: t('me.profile'), to: '/me/profile', icon: PhUser })
 
   if (auth.isAdmin) {
     links.push(
-      { label: t('admin.usersLink'), to: '/admin/users', icon: UsersIcon },
-      { label: t('admin.citiesLink'), to: '/admin/cities', icon: BuildingOffice2Icon },
-      { label: t('admin.districtsLink'), to: '/admin/districts', icon: MapIcon },
+      { label: t('admin.usersLink'), to: '/admin/users', icon: PhUsersThree },
+      { label: t('admin.citiesLink'), to: '/admin/cities', icon: PhBuildings },
+      { label: t('admin.districtsLink'), to: '/admin/districts', icon: PhMapPin },
     )
   }
 
@@ -53,30 +53,31 @@ function isActive(to: string): boolean {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="flex min-h-screen flex-col bg-paper text-ink dark:bg-night dark:text-paper">
     <AppHeader />
     <div class="flex flex-1">
-      <aside class="hidden w-64 border-r border-slate-200 bg-white lg:block">
-        <nav class="sticky top-16 space-y-1 p-4">
+      <aside class="hidden w-72 border-r border-ink/10 bg-paper-warm lg:block dark:border-night-border dark:bg-night-soft">
+        <nav class="sticky top-20 space-y-1 p-6">
           <RouterLink
             v-for="item in cabinetLinks"
             :key="item.to"
             :to="item.to"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150"
+            class="flex items-center gap-3 border border-transparent px-3 py-3 text-sm font-mono uppercase tracking-wider transition-colors duration-200"
             :class="isActive(item.to)
-              ? 'bg-primary-50 text-primary-700'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+              ? 'border-ink/25 text-ink dark:border-paper/35 dark:text-paper'
+              : 'text-ink-muted hover:border-ink/20 hover:text-ink dark:text-paper/65 dark:hover:border-paper/35 dark:hover:text-paper'"
           >
             <component
               :is="item.icon"
-              class="h-5 w-5 shrink-0"
-              :class="isActive(item.to) ? 'text-primary-600' : 'text-slate-400'"
+              :size="18"
+              weight="light"
+              class="shrink-0"
             />
             {{ item.label }}
           </RouterLink>
         </nav>
       </aside>
-      <main class="flex-1 bg-slate-50 p-6 lg:p-8">
+      <main class="flex-1 p-6 lg:p-10">
         <slot />
       </main>
     </div>

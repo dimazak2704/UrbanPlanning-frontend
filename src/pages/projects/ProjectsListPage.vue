@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { PlusIcon } from '@heroicons/vue/24/outline'
+import { PhPlus } from '@phosphor-icons/vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import ProjectCard from '@/components/cards/ProjectCard.vue'
@@ -91,21 +91,22 @@ onMounted(() => { loadLookups(); fetchProjects() })
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+  <div class="container-app py-12 md:py-16">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">{{ t('projects.title') }}</h1>
-        <p class="mt-1 text-sm text-slate-500">{{ t('projects.totalCount', { count: pagination.totalElements.value }) }}</p>
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">— 04 PROJECTS</p>
+        <h1 class="mt-2 text-4xl font-serif font-medium tracking-tight">{{ t('projects.title') }}</h1>
+        <p class="mt-2 text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('projects.totalCount', { count: pagination.totalElements.value }) }}</p>
       </div>
       <div class="flex items-center gap-3">
         <div class="w-48"><SortSelect v-model="sort" :options="sortOptions" /></div>
         <RouterLink v-if="auth.isAuthenticated" to="/projects/new"
-          class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 transition-all">
-          <PlusIcon class="h-4 w-4" /> {{ t('projects.createProject') }}
+          class="inline-flex items-center gap-2 border border-ink bg-ink px-6 py-3 text-xs font-mono uppercase tracking-wider text-paper transition-colors hover:border-accent hover:bg-accent dark:border-paper dark:bg-paper dark:text-night">
+          <PhPlus :size="14" weight="light" /> {{ t('projects.createProject') }}
         </RouterLink>
       </div>
     </div>
-    <div class="mb-6">
+    <div class="mb-8">
       <FilterPanel :has-active-filters="hasActiveFilters" @clear="clearFilters">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <BaseInput v-model="filters.name" :label="t('projects.form.name')" :placeholder="t('cities.searchByName')" />
@@ -113,15 +114,16 @@ onMounted(() => { loadLookups(); fetchProjects() })
           <BaseSelect v-model="filters.districtId" :options="districtOptions" :label="t('cities.region')" :placeholder="t('projects.allDistricts')" :disabled="!filters.cityId" />
           <BaseSelect v-model="filters.status" :options="statusOptions" :label="t('projects.form.status')" :placeholder="t('projects.allStatuses')" />
           <BaseSelect v-model="filters.architectId" :options="architectOptions" :label="t('projects.form.architect')" :placeholder="t('common.all')" />
-          <BaseInput v-model="filters.minBudget" :label="t('projects.budgetFrom')" type="number" placeholder="0" />
-          <BaseInput v-model="filters.maxBudget" :label="t('projects.budgetTo')" type="number" placeholder="∞" />
+          <BaseInput v-model="filters.minBudget" :label="t('projects.budgetFrom')" type="number" min="1" placeholder="1" />
+          <BaseInput v-model="filters.maxBudget" :label="t('projects.budgetTo')" type="number" min="1" placeholder="∞" />
           <BaseInput v-model="filters.startDateFrom" :label="t('projects.dateFrom')" type="date" />
+          <BaseInput v-model="filters.startDateTo" :label="t('projects.dateTo')" type="date" />
         </div>
       </FilterPanel>
     </div>
-    <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"><SkeletonCard v-for="i in 6" :key="i" /></div>
+    <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"><SkeletonCard v-for="i in 6" :key="i" /></div>
     <EmptyState v-else-if="projects.length === 0" :title="t('projects.notFound')" />
-    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
     </div>
     <div v-if="!pagination.loading.value && projects.length > 0" class="mt-8">

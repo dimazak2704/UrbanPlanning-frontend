@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
+import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue'
 
 interface Props {
   currentPage: number
@@ -63,21 +63,19 @@ function goToPage(page: number | '...') {
 <template>
   <div
     v-if="totalPages > 0"
-    class="flex flex-col items-center justify-between gap-4 sm:flex-row"
+    class="flex flex-col items-start justify-between gap-6 border-t border-ink/10 pt-6 sm:flex-row sm:items-center dark:border-night-border"
   >
-    <!-- Info -->
-    <div class="text-sm text-slate-500">
+    <div class="text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">
       {{ t('common.showingFromTo', { from: showingFrom, to: showingTo, total: totalElements }) }}
     </div>
 
-    <!-- Page buttons -->
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-2">
       <button
         :disabled="currentPage === 0"
-        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none"
+        class="border border-ink/20 p-2 text-ink-muted transition-colors hover:border-ink hover:text-ink disabled:pointer-events-none disabled:opacity-40 dark:border-paper/30 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper"
         @click="emit('update:page', currentPage - 1)"
       >
-        <ChevronLeftIcon class="h-4 w-4" />
+        <PhCaretLeft :size="14" weight="light" />
       </button>
 
       <button
@@ -85,12 +83,12 @@ function goToPage(page: number | '...') {
         :key="idx"
         :disabled="page === '...'"
         :class="[
-          'min-w-[36px] rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+          'min-w-[38px] border px-3 py-2 text-xs font-mono uppercase tracking-wider transition-colors',
           page === currentPage
-            ? 'bg-primary-600 text-white shadow-sm'
+            ? 'border-ink bg-ink text-paper dark:border-paper dark:bg-paper dark:text-night'
             : page === '...'
-              ? 'cursor-default text-slate-400'
-              : 'text-slate-600 hover:bg-slate-100',
+              ? 'cursor-default border-transparent text-ink-subtle dark:text-paper/45'
+              : 'border-ink/20 text-ink-muted hover:border-ink hover:text-ink dark:border-paper/30 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper',
         ]"
         @click="goToPage(page)"
       >
@@ -99,19 +97,18 @@ function goToPage(page: number | '...') {
 
       <button
         :disabled="currentPage >= totalPages - 1"
-        class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none"
+        class="border border-ink/20 p-2 text-ink-muted transition-colors hover:border-ink hover:text-ink disabled:pointer-events-none disabled:opacity-40 dark:border-paper/30 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper"
         @click="emit('update:page', currentPage + 1)"
       >
-        <ChevronRightIcon class="h-4 w-4" />
+        <PhCaretRight :size="14" weight="light" />
       </button>
     </div>
 
-    <!-- Page size -->
-    <div class="flex items-center gap-2 text-sm text-slate-500">
+    <div class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">
       <span>{{ t('common.perPage') }}</span>
       <select
         :value="pageSize"
-        class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+        class="border border-ink/20 bg-transparent px-2 py-1.5 text-xs text-ink focus:border-ink focus:outline-none dark:border-paper/30 dark:text-paper dark:focus:border-paper"
         @change="emit('update:size', Number(($event.target as HTMLSelectElement).value))"
       >
         <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">

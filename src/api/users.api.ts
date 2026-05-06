@@ -1,6 +1,6 @@
 import apiClient from './client'
 import type { Page, PageParams } from '@/types/api'
-import type { User, UserCreateRequest, UserUpdateRequest } from '@/types/user'
+import type { User, CreateUserRequest, UpdateUserRequest } from '@/types/user'
 
 export function getUsers(filters?: { email?: string; role?: string; active?: boolean }, pageable?: PageParams) {
   const params: Record<string, string | boolean> = {}
@@ -17,11 +17,11 @@ export function getUserById(id: number) {
   return apiClient.get<User>(`/users/${id}`)
 }
 
-export function createUser(data: UserCreateRequest) {
+export function createUser(data: CreateUserRequest) {
   return apiClient.post<User>('/users', data)
 }
 
-export function updateUser(id: number, data: UserUpdateRequest) {
+export function updateUser(id: number, data: UpdateUserRequest) {
   return apiClient.put<User>(`/users/${id}`, data)
 }
 

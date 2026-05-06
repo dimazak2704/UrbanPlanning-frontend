@@ -3,12 +3,7 @@ import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { City } from '@/types/city'
 import { formatNumber } from '@/utils/format'
-import {
-  MapPinIcon,
-  UsersIcon,
-  ArrowsPointingOutIcon,
-  ArrowRightIcon,
-} from '@heroicons/vue/24/outline'
+import { PhArrowRight, PhArrowsOut, PhMapPin, PhUsers } from '@phosphor-icons/vue'
 
 interface Props {
   city: City
@@ -21,35 +16,35 @@ const { t } = useI18n()
 <template>
   <RouterLink
     :to="`/cities/${city.id}`"
-    class="group block rounded-xl border border-slate-200 bg-white p-5 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:border-primary-200 hover:-translate-y-0.5"
+    class="card-unified group"
   >
-    <div class="flex items-start justify-between mb-3">
+    <div class="mb-4 flex items-start justify-between">
       <div>
-        <h3 class="text-base font-semibold text-slate-900 group-hover:text-primary-700 transition-colors">
+        <h3 class="font-serif text-2xl font-medium tracking-tight text-ink transition-colors group-hover:text-accent dark:text-paper">
           {{ city.name }}
         </h3>
-        <p class="mt-0.5 text-sm text-slate-500">{{ city.region }}</p>
+        <p class="mt-1 text-xs font-mono uppercase tracking-[0.18em] text-ink-muted dark:text-paper/65">{{ city.region }}</p>
       </div>
-      <div class="rounded-lg bg-primary-50 p-2 text-primary-600">
-        <MapPinIcon class="h-5 w-5" />
+      <div class="border border-ink/20 p-2 text-ink-muted dark:border-paper/25 dark:text-paper/65">
+        <PhMapPin :size="18" weight="light" />
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 mt-4">
-      <div class="flex items-center gap-2 text-sm text-slate-600">
-        <UsersIcon class="h-4 w-4 text-slate-400" />
+    <div class="mt-6 grid grid-cols-2 gap-6 border-t border-ink/10 pt-4 dark:border-night-border">
+      <div class="flex items-center gap-2 text-sm text-ink-muted dark:text-paper/70">
+        <PhUsers :size="15" weight="light" />
         <span>{{ formatNumber(city.population) }}</span>
       </div>
-      <div class="flex items-center gap-2 text-sm text-slate-600">
-        <ArrowsPointingOutIcon class="h-4 w-4 text-slate-400" />
+      <div class="flex items-center gap-2 text-sm text-ink-muted dark:text-paper/70">
+        <PhArrowsOut :size="15" weight="light" />
         <span>{{ formatNumber(city.area) }} {{ t('common.km2') }}</span>
       </div>
     </div>
 
-    <div class="mt-4 flex items-center justify-end border-t border-slate-100 pt-3">
-      <span class="flex items-center gap-1 text-xs font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div class="mt-4 flex items-center justify-end border-t border-ink/10 pt-4 dark:border-night-border">
+      <span class="flex items-center gap-1 text-xs font-mono uppercase tracking-[0.14em] text-ink-muted opacity-0 transition-opacity group-hover:opacity-100 dark:text-paper/65">
         {{ t('common.details') }}
-        <ArrowRightIcon class="h-3.5 w-3.5" />
+        <PhArrowRight :size="12" weight="light" />
       </span>
     </div>
   </RouterLink>

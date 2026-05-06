@@ -6,7 +6,7 @@ import BaseButton from '@/components/common/BaseButton.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
-import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
+import { PhBuildings } from '@phosphor-icons/vue'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
@@ -45,13 +45,13 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="rounded-2xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm">
-    <div class="mb-8 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-600 shadow-lg shadow-primary-600/30">
-        <BuildingOffice2Icon class="h-8 w-8 text-white" />
+  <div class="border border-ink/10 bg-paper-pure p-10 dark:border-night-border dark:bg-night-soft">
+    <div class="mb-10 text-center">
+      <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center border border-ink/20 dark:border-paper/25">
+        <PhBuildings :size="28" weight="thin" class="text-ink-muted dark:text-paper/65" />
       </div>
-      <h1 class="text-2xl font-bold text-slate-900">{{ t('auth.loginTitle') }}</h1>
-      <p class="mt-1.5 text-sm text-slate-500">{{ t('auth.loginSubtitle') }}</p>
+      <h1 class="font-serif text-4xl font-medium tracking-tight text-ink dark:text-paper">{{ t('auth.loginTitle') }}</h1>
+      <p class="mt-2 text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">{{ t('auth.loginSubtitle') }}</p>
     </div>
 
     <form class="space-y-5" @submit.prevent="handleLogin">
@@ -75,7 +75,7 @@ async function handleLogin() {
 
       <div
         v-if="errorMessage"
-        class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700"
+        class="border border-status-suspended/40 bg-accent-soft/20 px-4 py-3 text-sm text-status-suspended"
       >
         {{ errorMessage }}
       </div>
@@ -92,18 +92,5 @@ async function handleLogin() {
       </BaseButton>
     </form>
 
-    <div class="mt-6 rounded-lg bg-slate-50 border border-slate-200 p-4">
-      <p class="text-xs font-medium text-slate-500 mb-2">{{ t('auth.testAccounts') }}</p>
-      <div class="space-y-1.5 text-xs text-slate-600">
-        <p>
-          <span class="font-medium text-slate-700">{{ t('auth.admin') }}:</span>
-          admin@urban.com / admin123
-        </p>
-        <p>
-          <span class="font-medium text-slate-700">{{ t('auth.architect') }}:</span>
-          ivan.shevchenko@urban.com / password123
-        </p>
-      </div>
-    </div>
   </div>
 </template>

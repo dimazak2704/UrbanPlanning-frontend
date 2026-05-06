@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { useI18n } from 'vue-i18n'
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -24,6 +24,7 @@ const profileForm = ref<UpdateMeRequest>({
 })
 const originalProfile = ref<UpdateMeRequest | null>(null)
 const profileSaving = ref(false)
+const profileErrors = ref<Record<string, string>>({})
 
 const pwdForm = ref<ChangePasswordRequest>({ currentPassword: '', newPassword: '' })
 const confirmPwd = ref('')
@@ -31,6 +32,8 @@ const pwdSaving = ref(false)
 const pwdErrors = ref<{current?: string; new?: string; confirm?: string}>({})
 
 const avatarUrl = ref<string | null>(null)
+const avatarSaving = ref(false)
+const avatarInitialized = ref(false)
 const showAvatarDelete = ref(false)
 
 async function fetchProfile() {
@@ -44,12 +47,32 @@ async function fetchProfile() {
     }
     originalProfile.value = { ...profileForm.value }
     avatarUrl.value = data.avatarUrl || null
+    avatarInitialized.value = true
   } catch {
     toast.error(t('me.profileLoadError'))
   }
 }
 
 onMounted(fetchProfile)
+
+watch(avatarUrl, async (next, prev) => {
+  if (!avatarInitialized.value) return
+  if (next === prev) return
+  if (avatarSaving.value) return
+
+  avatarSaving.value = true
+  try {
+    const { data } = await updateMyProfile({ avatarUrl: next })
+    profile.value = data
+    avatarUrl.value = data.avatarUrl || null
+    toast.success(t('me.profileSaved'))
+  } catch {
+    avatarUrl.value = prev ?? null
+    toast.error(t('me.profileSaveError'))
+  } finally {
+    avatarSaving.value = false
+  }
+})
 
 const hasChanges = computed(() => {
   if (!originalProfile.value) return false
@@ -58,6 +81,13 @@ const hasChanges = computed(() => {
 
 async function saveProfile() {
   if (!hasChanges.value) return
+  profileErrors.value = {}
+  if (!profileForm.value.lastName?.trim()) profileErrors.value.lastName = t('validation.required')
+  if (!profileForm.value.firstName?.trim()) profileErrors.value.firstName = t('validation.required')
+  if (profileForm.value.experienceYears !== undefined && profileForm.value.experienceYears <= 0) {
+    profileErrors.value.experienceYears = t('validation.minValue', { min: 1 })
+  }
+  if (Object.keys(profileErrors.value).length > 0) return
   profileSaving.value = true
   try {
     const changedFields: Partial<UpdateMeRequest> = {}
@@ -90,12 +120,12 @@ async function savePwd() {
   pwdSaving.value = true
   try {
     await changeMyPassword(pwdForm.value)
-    toast.success(t('me.pwdChanged'))
+    toast.success(t('me.passwordChanged'))
     pwdForm.value = { currentPassword: '', newPassword: '' }
     confirmPwd.value = ''
   } catch (err: any) {
-    if (err.response?.status === 400) toast.error(t('me.wrongPwd'))
-    else toast.error(t('me.pwdChangeError'))
+    if (err.response?.status === 400) toast.error(t('me.wrongCurrentPassword'))
+    else toast.error(t('me.passwordChangeError'))
   } finally {
     pwdSaving.value = false
   }
@@ -114,25 +144,25 @@ async function handleDeleteAvatar() {
 </script>
 
 <template>
-  <div class="space-y-6 max-w-4xl">
-    <h1 class="text-2xl font-bold text-slate-900">{{ t('me.myProfile') }}</h1>
+  <div class="max-w-5xl min-h-[calc(100vh-260px)] space-y-8 pb-10">
+    <h1 class="font-serif text-4xl font-medium tracking-tight text-ink dark:text-paper">{{ t('me.profile') }}</h1>
 
     <div v-if="profile" class="card">
       <TabGroup>
-        <TabList class="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-6">
+        <TabList class="mb-6 flex space-x-1 border border-ink/10 bg-paper-warm p-1 dark:border-night-border dark:bg-night-elevated">
           <Tab v-if="auth.isArchitect" v-slot="{ selected }" as="template">
-            <button :class="['w-full rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-primary-400 focus:outline-none focus:ring-2', selected ? 'bg-white shadow text-primary-700' : 'text-slate-600 hover:bg-white/[0.12] hover:text-slate-900']">
-              {{ t('me.tabs.profile') }}
+            <button :class="['w-full py-2.5 text-xs font-mono uppercase tracking-wider focus:outline-none', selected ? 'border border-ink/20 bg-paper-pure text-ink dark:border-paper/35 dark:bg-night-soft dark:text-paper' : 'text-ink-muted hover:text-ink dark:text-paper/65 dark:hover:text-paper']">
+              {{ t('me.profileTab') }}
             </button>
           </Tab>
           <Tab v-slot="{ selected }" as="template">
-            <button :class="['w-full rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-primary-400 focus:outline-none focus:ring-2', selected ? 'bg-white shadow text-primary-700' : 'text-slate-600 hover:bg-white/[0.12] hover:text-slate-900']">
-              {{ t('me.tabs.security') }}
+            <button :class="['w-full py-2.5 text-xs font-mono uppercase tracking-wider focus:outline-none', selected ? 'border border-ink/20 bg-paper-pure text-ink dark:border-paper/35 dark:bg-night-soft dark:text-paper' : 'text-ink-muted hover:text-ink dark:text-paper/65 dark:hover:text-paper']">
+              {{ t('me.securityTab') }}
             </button>
           </Tab>
           <Tab v-slot="{ selected }" as="template">
-            <button :class="['w-full rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-primary-400 focus:outline-none focus:ring-2', selected ? 'bg-white shadow text-primary-700' : 'text-slate-600 hover:bg-white/[0.12] hover:text-slate-900']">
-              {{ t('me.tabs.account') }}
+            <button :class="['w-full py-2.5 text-xs font-mono uppercase tracking-wider focus:outline-none', selected ? 'border border-ink/20 bg-paper-pure text-ink dark:border-paper/35 dark:bg-night-soft dark:text-paper' : 'text-ink-muted hover:text-ink dark:text-paper/65 dark:hover:text-paper']">
+              {{ t('me.accountTab') }}
             </button>
           </Tab>
         </TabList>
@@ -144,25 +174,25 @@ async function handleDeleteAvatar() {
               <div class="w-32">
                 <ImageUploader v-model="avatarUrl" endpoint="avatars" />
               </div>
-              <div v-if="avatarUrl">
+              <div v-if="avatarUrl" class="pt-4">
                 <BaseButton variant="danger" size="sm" @click="showAvatarDelete = true">{{ t('me.deleteAvatar') }}</BaseButton>
               </div>
             </div>
 
             <form @submit.prevent="saveProfile" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <BaseInput v-model="profileForm.lastName" :label="t('forms.lastName')" />
-                <BaseInput v-model="profileForm.firstName" :label="t('forms.firstName')" />
-                <BaseInput v-model="profileForm.patronymic" :label="t('forms.patronymic')" />
+                <BaseInput v-model="profileForm.lastName" :label="t('me.lastName')" :error="profileErrors.lastName" />
+                <BaseInput v-model="profileForm.firstName" :label="t('me.firstName')" :error="profileErrors.firstName" />
+                <BaseInput v-model="profileForm.patronymic" :label="t('me.patronymic')" />
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <BaseInput v-model="profileForm.specialization" :label="t('architects.form.specialization')" />
-                <BaseInput v-model="profileForm.experienceYears" type="number" :label="t('architects.form.exp')" />
+                <BaseInput v-model="profileForm.specialization" :label="t('me.specializationLabel')" />
+                <BaseInput v-model="profileForm.experienceYears" type="number" min="1" :label="t('me.experienceLabel')" :error="profileErrors.experienceYears" />
               </div>
-              <BaseInput v-model="profileForm.phoneNumber" :label="t('forms.phone')" />
+              <BaseInput v-model="profileForm.phoneNumber" :label="t('me.phoneLabel')" />
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('architects.form.bio') }}</label>
-                <textarea v-model="profileForm.bio" rows="4" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none resize-none" />
+                <label class="mb-2 block text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65">{{ t('me.bioLabel') }}</label>
+                <textarea v-model="profileForm.bio" rows="4" class="w-full border-b border-ink/20 bg-transparent px-0 py-3 text-base text-ink focus:border-ink focus:outline-none resize-none dark:border-paper/30 dark:text-paper dark:focus:border-paper" />
               </div>
               
               <div class="flex justify-end pt-4">
@@ -175,36 +205,36 @@ async function handleDeleteAvatar() {
 
           <!-- Безпека -->
           <TabPanel class="space-y-4 focus:outline-none max-w-md">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">{{ t('me.pwdChange') }}</h3>
+            <h3 class="mb-4 font-serif text-2xl font-medium tracking-tight text-ink dark:text-paper">{{ t('me.changePassword') }}</h3>
             <form @submit.prevent="savePwd" class="space-y-4">
-              <BaseInput v-model="pwdForm.currentPassword" type="password" :label="t('me.currentPwd') + ' *'" :error="pwdErrors.current" />
-              <BaseInput v-model="pwdForm.newPassword" type="password" :label="t('me.newPwd') + ' *'" :error="pwdErrors.new" />
-              <BaseInput v-model="confirmPwd" type="password" :label="t('me.confirmPwd') + ' *'" :error="pwdErrors.confirm" />
+              <BaseInput v-model="pwdForm.currentPassword" type="password" :label="t('me.currentPassword')" :error="pwdErrors.current" />
+              <BaseInput v-model="pwdForm.newPassword" type="password" :label="t('me.newPassword')" :error="pwdErrors.new" />
+              <BaseInput v-model="confirmPwd" type="password" :label="t('me.confirmPassword')" :error="pwdErrors.confirm" />
               <div class="pt-2">
-                <BaseButton type="submit" :loading="pwdSaving">{{ t('me.changePwd') }}</BaseButton>
+                <BaseButton type="submit" :loading="pwdSaving">{{ t('me.changePasswordBtn') }}</BaseButton>
               </div>
             </form>
           </TabPanel>
 
           <!-- Акаунт -->
           <TabPanel class="focus:outline-none">
-            <h3 class="text-lg font-medium text-slate-900 mb-4">{{ t('me.accountInfo') }}</h3>
+            <h3 class="mb-4 font-serif text-2xl font-medium tracking-tight text-ink dark:text-paper">{{ t('me.accountInfo') }}</h3>
             <div class="space-y-4 max-w-md">
-              <div class="flex justify-between py-3 border-b border-slate-100">
-                <span class="text-sm font-medium text-slate-500">Email</span>
-                <span class="text-sm text-slate-900">{{ profile.email }}</span>
+              <div class="flex justify-between border-b border-ink/10 py-3 dark:border-night-border">
+                <span class="text-sm font-medium text-ink-muted dark:text-paper/65">Email</span>
+                <span class="text-sm text-ink dark:text-paper">{{ profile.email }}</span>
               </div>
-              <div class="flex justify-between py-3 border-b border-slate-100">
-                <span class="text-sm font-medium text-slate-500">{{ t('forms.role') }}</span>
-                <span class="text-sm text-slate-900">{{ ROLE_LABELS[profile.role] }}</span>
+              <div class="flex justify-between border-b border-ink/10 py-3 dark:border-night-border">
+                <span class="text-sm font-medium text-ink-muted dark:text-paper/65">{{ t('me.roleLabel') }}</span>
+                <span class="text-sm text-ink dark:text-paper">{{ ROLE_LABELS[profile.role] }}</span>
               </div>
-              <div class="flex justify-between py-3 border-b border-slate-100">
-                <span class="text-sm font-medium text-slate-500">{{ t('forms.status') }}</span>
-                <span class="text-sm text-emerald-600 font-medium">{{ t('common.active') }}</span>
+              <div class="flex justify-between border-b border-ink/10 py-3 dark:border-night-border">
+                <span class="text-sm font-medium text-ink-muted dark:text-paper/65">{{ t('me.statusLabel') }}</span>
+                <span class="text-sm font-medium text-status-completed">{{ t('me.activeStatus') }}</span>
               </div>
-              <div class="flex justify-between py-3 border-b border-slate-100">
-                <span class="text-sm font-medium text-slate-500">{{ t('common.created') }}</span>
-                <span class="text-sm text-slate-900">{{ formatDate(profile.createdAt) }}</span>
+              <div class="flex justify-between border-b border-ink/10 py-3 dark:border-night-border">
+                <span class="text-sm font-medium text-ink-muted dark:text-paper/65">{{ t('me.registrationDate') }}</span>
+                <span class="text-sm text-ink dark:text-paper">{{ formatDate(profile.createdAt) }}</span>
               </div>
             </div>
           </TabPanel>
@@ -215,7 +245,7 @@ async function handleDeleteAvatar() {
     <ConfirmDialog
       v-model="showAvatarDelete"
       :title="t('me.deleteAvatarConfirm')"
-      :message="t('me.deleteAvatarDesc')"
+      :message="t('me.deleteAvatarMessage')"
       @confirm="handleDeleteAvatar"
     />
   </div>

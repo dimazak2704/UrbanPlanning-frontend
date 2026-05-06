@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useDark } from '@vueuse/core'
 import { Pie } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -23,10 +24,16 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   title: '',
 })
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'class',
+  valueDark: 'dark',
+  valueLight: '',
+})
 
 const COLORS = [
-  '#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#10b981',
-  '#8b5cf6', '#06b6d4', '#f97316', '#ec4899', '#64748b',
+  '#B8533A', '#2D5F8B', '#3A6B3A', '#8B2D2D', '#6B6B6B',
+  '#7C5A3A', '#4A5D70', '#5E6B4A', '#7A4747', '#545454',
 ]
 
 const chartData = computed(() => ({
@@ -35,9 +42,9 @@ const chartData = computed(() => ({
     {
       data: props.data.map((d) => d.value),
       backgroundColor: COLORS.slice(0, props.data.length),
-      borderWidth: 2,
-      borderColor: '#ffffff',
-      hoverOffset: 6,
+      borderWidth: 1,
+      borderColor: isDark.value ? '#242424' : '#FAFAF7',
+      hoverOffset: 4,
     },
   ],
 }))
@@ -51,28 +58,28 @@ const chartOptions = computed(() => ({
       labels: {
         padding: 16,
         usePointStyle: true,
-        pointStyle: 'circle',
-        font: { family: 'Inter', size: 12 },
-        color: '#64748b',
+        pointStyle: 'line',
+        font: { family: 'JetBrains Mono', size: 13 },
+        color: isDark.value ? '#C7C7C5' : '#6B6B6B',
       },
     },
     tooltip: {
-      backgroundColor: '#1e293b',
-      titleFont: { family: 'Inter', size: 13 },
-      bodyFont: { family: 'Inter', size: 12 },
+      backgroundColor: isDark.value ? '#242424' : '#0A0A0A',
+      titleFont: { family: 'Inter', size: 12 },
+      bodyFont: { family: 'Inter', size: 11 },
       padding: 12,
-      cornerRadius: 8,
+      cornerRadius: 0,
     },
   },
 }))
 </script>
 
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-5">
-    <h3 v-if="title" class="mb-4 text-base font-semibold text-slate-900">{{ title }}</h3>
+  <div class="border border-ink/10 bg-paper-pure p-5 dark:border-night-border dark:bg-night-soft">
+    <h3 v-if="title" class="mb-4 font-serif text-xl font-medium tracking-tight text-ink dark:text-paper">{{ title }}</h3>
     <div class="h-64">
       <Pie v-if="data.length > 0" :data="chartData" :options="chartOptions" />
-      <div v-else class="flex h-full items-center justify-center text-sm text-slate-400">
+      <div v-else class="flex h-full items-center justify-center text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">
         Немає даних
       </div>
     </div>

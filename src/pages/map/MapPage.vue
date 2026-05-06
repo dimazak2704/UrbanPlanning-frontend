@@ -11,7 +11,14 @@ import { useDebounce } from '@/composables/useDebounce'
 import { PROJECT_STATUS_LABELS, INFRASTRUCTURE_TYPE_LABELS, INFRASTRUCTURE_STATUS_LABELS } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
 import type { CityMapMarker, ProjectMapMarker, InfrastructureMapMarker, MapBounds } from '@/types/map'
-import type { ProjectStatus, InfrastructureType, InfrastructureStatus } from '@/types/enums'
+import {
+  PROJECT_STATUS_VALUES,
+  INFRASTRUCTURE_TYPE_VALUES,
+  INFRASTRUCTURE_STATUS_VALUES,
+  type ProjectStatus,
+  type InfrastructureType,
+  type InfrastructureStatus,
+} from '@/types/enums'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -29,15 +36,21 @@ const filterInfraStatus = ref<InfrastructureStatus | ''>('')
 
 const bounds = ref<MapBounds | null>(null)
 const boundsJson = ref('')
-const debouncedBounds = useDebounce(ref(boundsJson.value), 500)
+const debouncedBounds = useDebounce(boundsJson, 500)
 
 const cities = ref<CityMapMarker[]>([])
 const projectMarkers = ref<ProjectMapMarker[]>([])
 const infraMarkers = ref<InfrastructureMapMarker[]>([])
 const cityOptions = ref<{ value: number; label: string }[]>([])
-const statusOptions = computed(() => Object.entries(PROJECT_STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })))
-const infraTypeOptions = computed(() => Object.entries(INFRASTRUCTURE_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l })))
-const infraStatusOptions = computed(() => Object.entries(INFRASTRUCTURE_STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })))
+const statusOptions = computed(() =>
+  PROJECT_STATUS_VALUES.map((value) => ({ value, label: PROJECT_STATUS_LABELS[value] })),
+)
+const infraTypeOptions = computed(() =>
+  INFRASTRUCTURE_TYPE_VALUES.map((value) => ({ value, label: INFRASTRUCTURE_TYPE_LABELS[value] })),
+)
+const infraStatusOptions = computed(() =>
+  INFRASTRUCTURE_STATUS_VALUES.map((value) => ({ value, label: INFRASTRUCTURE_STATUS_LABELS[value] })),
+)
 
 const selectedItem = ref<{ type: string; name: string; html: string } | null>(null)
 
@@ -127,7 +140,9 @@ watch(infraLayer, renderInfra)
 onMounted(async () => {
   if (!mapContainer.value) return
   map = L.map(mapContainer.value).setView([49.0, 32.0], 6)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+  }).addTo(map)
   cityLayerGroup = L.layerGroup().addTo(map)
   projectLayerGroup = L.layerGroup().addTo(map)
   infraLayerGroup = L.layerGroup().addTo(map)
@@ -141,36 +156,36 @@ onBeforeUnmount(() => { if (map) { map.remove(); map = null } })
 </script>
 
 <template>
-  <div class="relative flex" style="height: calc(100vh - 64px)">
+  <div class="relative flex" style="height: calc(100vh - 80px)">
     <!-- Sidebar -->
     <transition
       enter-active-class="transition duration-200 ease-out" enter-from-class="-translate-x-full opacity-0" enter-to-class="translate-x-0 opacity-100"
       leave-active-class="transition duration-150 ease-in" leave-from-class="translate-x-0 opacity-100" leave-to-class="-translate-x-full opacity-0">
-      <div v-if="sidebarOpen" class="absolute left-0 top-0 bottom-0 z-20 w-80 bg-white border-r border-slate-200 overflow-y-auto shadow-lg">
-        <div class="p-4 border-b border-slate-100">
+      <div v-if="sidebarOpen" class="absolute bottom-0 left-0 top-0 z-20 w-80 overflow-y-auto border-r border-ink/10 bg-paper/90 backdrop-blur-md dark:border-night-border dark:bg-night-soft/95">
+        <div class="border-b border-ink/10 p-4 dark:border-night-border">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-slate-900">{{ t('map.title') }}</h2>
-            <button @click="sidebarOpen = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">✕</button>
+            <h2 class="font-serif text-2xl font-medium tracking-tight text-ink dark:text-paper">{{ t('map.title') }}</h2>
+            <button @click="sidebarOpen = false" class="border border-ink/20 p-1.5 text-ink-muted hover:border-ink hover:text-ink dark:border-paper/25 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper">✕</button>
           </div>
           <!-- Layers -->
           <div class="space-y-2 mb-4">
-            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="cityLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-indigo-500 inline-block" /> {{ t('header.cities') }}</span></label>
-            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="projectLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-blue-500 inline-block" /> {{ t('header.projects') }}</span></label>
-            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="infraLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-teal-500 inline-block" /> {{ t('header.infrastructures') }}</span></label>
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-muted dark:text-paper/70"><input v-model="cityLayer" type="checkbox" class="rounded border-ink/30 text-accent focus:ring-accent" /><span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full bg-indigo-500" /> {{ t('header.cities') }}</span></label>
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-muted dark:text-paper/70"><input v-model="projectLayer" type="checkbox" class="rounded border-ink/30 text-accent focus:ring-accent" /><span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full bg-blue-500" /> {{ t('header.projects') }}</span></label>
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-muted dark:text-paper/70"><input v-model="infraLayer" type="checkbox" class="rounded border-ink/30 text-accent focus:ring-accent" /><span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full bg-teal-500" /> {{ t('header.infrastructures') }}</span></label>
           </div>
         </div>
         <!-- Filters -->
-        <div class="p-4 space-y-3">
+        <div class="space-y-3 p-4">
           <BaseSelect v-model="filterCity" :options="cityOptions" :label="t('cities.cityName')" :placeholder="t('projects.allCities')" />
           <BaseSelect v-model="filterProjectStatus" :options="statusOptions" :label="t('projects.form.status')" :placeholder="t('common.all')" />
           <BaseSelect v-model="filterInfraType" :options="infraTypeOptions" :label="t('infrastructures.form.type')" :placeholder="t('common.all')" />
           <BaseSelect v-model="filterInfraStatus" :options="infraStatusOptions" :label="t('infrastructures.form.status')" :placeholder="t('common.all')" />
         </div>
         <!-- Legend -->
-        <div class="p-4 border-t border-slate-100">
-          <h3 class="text-xs font-semibold text-slate-500 uppercase mb-2">{{ t('map.projectsLegend') }}</h3>
+        <div class="border-t border-ink/10 p-4 dark:border-night-border">
+          <h3 class="mb-2 text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65">{{ t('map.legend') }}</h3>
           <div class="space-y-1">
-            <div v-for="(color, status) in PROJECT_COLORS" :key="status" class="flex items-center gap-2 text-xs text-slate-600">
+            <div v-for="(color, status) in PROJECT_COLORS" :key="status" class="flex items-center gap-2 text-xs text-ink-muted dark:text-paper/70">
               <span class="h-2.5 w-2.5 rounded-full inline-block" :style="{ backgroundColor: color }" />
               {{ (PROJECT_STATUS_LABELS as Record<string, string>)[status] || status }}
             </div>
@@ -181,8 +196,8 @@ onBeforeUnmount(() => { if (map) { map.remove(); map = null } })
 
     <!-- Toggle sidebar -->
     <button v-if="!sidebarOpen" @click="sidebarOpen = true"
-      class="absolute left-3 top-3 z-20 rounded-lg bg-white border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 shadow-md hover:bg-slate-50 transition-colors">
-      ☰ {{ t('common.filters') }}
+      class="absolute left-3 top-3 z-20 border border-ink/15 bg-paper/90 px-3 py-2 text-xs font-mono uppercase tracking-wider text-ink backdrop-blur-sm transition-colors hover:border-ink hover:bg-paper dark:border-paper/25 dark:bg-night-soft/90 dark:text-paper dark:hover:border-paper">
+      ☰ {{ t('map.filters') }}
     </button>
 
     <!-- Map -->

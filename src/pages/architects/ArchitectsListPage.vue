@@ -43,27 +43,28 @@ onMounted(fetchArchitects)
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+  <div class="container-app py-12 md:py-16">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">{{ t('architects.title') }}</h1>
-        <p class="mt-1 text-sm text-slate-500">{{ t('architects.totalCount', { count: pagination.totalElements.value }) }}</p>
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">— 06 ARCHITECTS</p>
+        <h1 class="mt-2 text-4xl font-serif font-medium tracking-tight">{{ t('architects.title') }}</h1>
+        <p class="mt-2 text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('architects.totalCount', { count: pagination.totalElements.value }) }}</p>
       </div>
       <div class="w-48"><SortSelect v-model="sort" :options="sortOptions" /></div>
     </div>
-    <div class="mb-6">
+    <div class="mb-8">
       <FilterPanel :has-active-filters="hasActiveFilters" @clear="clearFilters">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <BaseInput v-model="filters.fullName" :label="t('architects.form.name')" :placeholder="t('architects.searchByName')" />
           <BaseInput v-model="filters.specialization" :label="t('architects.form.specialization')" :placeholder="t('cities.searchByName')" />
-          <BaseInput v-model="filters.minExperience" :label="t('architects.expFrom')" type="number" placeholder="0" />
-          <BaseInput v-model="filters.maxExperience" :label="t('architects.expTo')" type="number" placeholder="50" />
+          <BaseInput v-model="filters.minExperience" :label="t('architects.expFrom')" type="number" min="1" placeholder="1" />
+          <BaseInput v-model="filters.maxExperience" :label="t('architects.expTo')" type="number" min="1" placeholder="50" />
         </div>
       </FilterPanel>
     </div>
-    <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"><SkeletonCard v-for="i in 6" :key="i" /></div>
+    <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"><SkeletonCard v-for="i in 6" :key="i" /></div>
     <EmptyState v-else-if="architects.length === 0" :title="t('architects.notFound')" />
-    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       <ArchitectCard v-for="a in architects" :key="a.id" :architect="a" />
     </div>
     <div v-if="!pagination.loading.value && architects.length > 0" class="mt-8">

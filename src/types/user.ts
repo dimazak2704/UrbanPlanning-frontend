@@ -20,6 +20,7 @@ export interface CreateUserRequest {
   email: string
   password: string
   role: Role
+  active?: boolean
   firstName?: string | null
   lastName?: string | null
   patronymic?: string | null

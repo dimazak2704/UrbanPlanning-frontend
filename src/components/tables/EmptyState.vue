@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { InboxIcon } from '@heroicons/vue/24/outline'
+import { PhBlueprint } from '@phosphor-icons/vue'
 
 interface Props {
   title?: string
@@ -22,17 +22,17 @@ const { t } = useI18n()
 
 <template>
   <div class="flex flex-col items-center justify-center py-16 text-center">
-    <div class="mb-4 rounded-full bg-slate-100 p-4">
+    <div class="mb-6 border border-ink/15 p-5 text-ink-muted dark:border-paper/25 dark:text-paper/65">
       <slot name="icon">
-        <InboxIcon class="h-10 w-10 text-slate-400" />
+        <PhBlueprint :size="40" weight="thin" />
       </slot>
     </div>
-    <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ title || t('common.noData') }}</h3>
-    <p class="text-sm text-slate-500 max-w-sm">{{ description || t('common.noData') }}</p>
+    <h3 class="mb-2 font-serif text-3xl font-medium tracking-tight text-ink dark:text-paper">{{ title || t('common.noData') }}</h3>
+    <p class="max-w-xl text-base leading-relaxed text-ink-muted dark:text-paper/70">{{ description || t('common.noData') }}</p>
     <RouterLink
       v-if="actionLabel && actionTo"
       :to="actionTo"
-      class="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700"
+      class="mt-8 inline-flex items-center gap-2 border border-ink bg-ink px-8 py-4 text-sm font-mono uppercase tracking-wider text-paper transition-colors hover:bg-accent hover:border-accent dark:border-paper dark:bg-paper dark:text-night"
     >
       {{ actionLabel }}
     </RouterLink>

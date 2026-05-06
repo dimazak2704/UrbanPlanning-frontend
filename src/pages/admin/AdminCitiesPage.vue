@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { RouterLink } from 'vue-router'
+import { PhPencilSimple, PhPlus, PhTrash } from '@phosphor-icons/vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
@@ -11,6 +12,7 @@ import FilterPanel from '@/components/tables/FilterPanel.vue'
 import EmptyState from '@/components/tables/EmptyState.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import LocationPicker from '@/components/forms/LocationPicker.vue'
+import SortSelect from '@/components/tables/SortSelect.vue'
 
 import { getCities, createCity, updateCity, deleteCity } from '@/api/cities.api'
 import { usePagination } from '@/composables/usePagination'
@@ -22,17 +24,26 @@ const toast = useToastStore()
 const { t } = useI18n()
 const loading = ref(true)
 const cities = ref<City[]>([])
+const sort = ref('name,asc')
 
 const filters = ref<CityFilters>({ name: '', region: '' })
-const { page, totalPages, totalElements, updatePage, setTotal } = usePagination(0)
-const debouncedFilters = useDebounce(filters.value, 500)
+const pagination = usePagination({ defaultSize: 10 })
+const debouncedFilters = useDebounce(filters, 500)
+const sortOptions = [
+  { value: 'name,asc', label: t('cities.sortNameAsc') },
+  { value: 'name,desc', label: t('cities.sortNameDesc') },
+  { value: 'population,desc', label: t('cities.sortPopDesc') },
+  { value: 'population,asc', label: t('cities.sortPopAsc') },
+  { value: 'area,desc', label: t('cities.sortAreaDesc') },
+  { value: 'area,asc', label: t('cities.sortAreaAsc') },
+]
 
 async function fetchCities() {
   loading.value = true
   try {
-    const { data } = await getCities(debouncedFilters.value, { page: page.value, size: 10, sort: 'name,asc' })
+    const { data } = await getCities(debouncedFilters.value, { page: pagination.page.value, size: pagination.size.value, sort: sort.value })
     cities.value = data.content
-    setTotal(data.totalElements, data.totalPages)
+    pagination.updateFromResponse(data)
   } catch {
     toast.error(t('cities.loadError'))
   } finally {
@@ -40,8 +51,9 @@ async function fetchCities() {
   }
 }
 
-watch([debouncedFilters, page], fetchCities)
-watch(filters, () => { page.value = 0 }, { deep: true })
+watch([debouncedFilters, sort], () => { pagination.page.value = 0; fetchCities() }, { deep: true })
+watch(() => pagination.page.value, fetchCities)
+watch(() => pagination.size.value, fetchCities)
 
 onMounted(fetchCities)
 
@@ -100,7 +112,7 @@ async function confirmDelete() {
   try {
     await deleteCity(itemToDelete.value.id)
     toast.success(t('cities.deleteSuccess'))
-    if (cities.value.length === 1 && page.value > 0) page.value--
+    if (cities.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchCities()
   } catch {
     toast.error(t('cities.deleteError'))
@@ -111,31 +123,34 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="min-h-[calc(100vh-260px)] space-y-8 pb-10">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-slate-900">{{ t('admin.citiesManagement') }}</h1>
-      <BaseButton @click="openCreate"><template #iconLeft><PlusIcon class="h-4 w-4" /></template>{{ t('cities.addCity') }}</BaseButton>
+      <h1 class="font-serif text-4xl font-medium tracking-tight text-ink dark:text-paper">{{ t('admin.citiesManagement') }}</h1>
+      <div class="flex items-center gap-3">
+        <div class="w-52"><SortSelect v-model="sort" :options="sortOptions" /></div>
+        <BaseButton @click="openCreate"><template #iconLeft><PhPlus :size="14" weight="light" /></template>{{ t('cities.addCity') }}</BaseButton>
+      </div>
     </div>
 
-    <FilterPanel @reset="filters = { name: '', region: '' }">
+    <FilterPanel :has-active-filters="Boolean(filters.name || filters.region)" @clear="filters = { name: '', region: '' }">
       <BaseInput v-model="filters.name" :placeholder="t('cities.searchByName')" />
-      <BaseInput v-model="filters.region" :placeholder="t('cities.regionPlaceholder')" />
+      <BaseInput v-model="filters.region" :placeholder="t('cities.searchByRegion')" />
     </FilterPanel>
 
-    <div class="card p-0 overflow-hidden">
+    <div class="card overflow-hidden p-0">
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200">
-          <thead class="bg-slate-50">
+        <table class="min-w-full">
+          <thead class="border-b border-ink/10 bg-paper-warm dark:border-night-border dark:bg-night-elevated">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.cityName') }}</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.region') }}</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.population') }}</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.area') }} ({{ t('common.km2') }})</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-ink-muted dark:text-paper/65">ID</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('cities.cityName') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('cities.region') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('cities.population') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-ink-muted dark:text-paper/65">{{ t('cities.area') }} ({{ t('common.km2') }})</th>
               <th scope="col" class="relative px-6 py-3"><span class="sr-only">{{ t('common.actions') }}</span></th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-slate-200">
+          <tbody class="bg-paper-pure dark:bg-night-soft">
             <tr v-if="loading" class="animate-pulse">
               <td colspan="6" class="px-6 py-12 text-center"><LoadingSpinner class="mx-auto" /></td>
             </tr>
@@ -144,38 +159,42 @@ async function confirmDelete() {
                 <EmptyState :title="t('cities.notFound')" :description="t('cities.notFoundDescription')" />
               </td>
             </tr>
-            <tr v-else v-for="city in cities" :key="city.id" class="hover:bg-slate-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ city.id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{{ city.name }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ city.region }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ city.population }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ city.area }}</td>
+            <tr v-else v-for="city in cities" :key="city.id" class="border-b border-ink/10 hover:bg-paper-warm dark:border-night-border dark:hover:bg-night-elevated">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-ink-muted dark:text-paper/65">{{ city.id }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <RouterLink :to="`/cities/${city.id}`" class="text-ink transition-colors hover:text-accent dark:text-paper dark:hover:text-accent">
+                  {{ city.name }}
+                </RouterLink>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-ink-muted dark:text-paper/65">{{ city.region }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-ink-muted dark:text-paper/65">{{ city.population }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-ink-muted dark:text-paper/65">{{ city.area }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button @click="openEdit(city)" class="text-indigo-600 hover:text-indigo-900 mr-4">
-                  <PencilSquareIcon class="h-5 w-5" />
+                <button @click="openEdit(city)" class="mr-4 text-ink-muted hover:text-accent dark:text-paper/65">
+                  <PhPencilSimple :size="18" weight="light" />
                 </button>
-                <button @click="itemToDelete = city" class="text-red-600 hover:text-red-900">
-                  <TrashIcon class="h-5 w-5" />
+                <button @click="itemToDelete = city" class="text-status-suspended">
+                  <PhTrash :size="18" weight="light" />
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div v-if="!loading && cities.length > 0" class="border-t border-slate-200 px-6 py-4 bg-slate-50">
-        <Pagination :current-page="page" :total-pages="totalPages" @update:page="updatePage" />
+      <div v-if="!loading && cities.length > 0" class="border-t border-ink/10 bg-paper-warm px-6 py-4 dark:border-night-border dark:bg-night-elevated">
+        <Pagination :current-page="pagination.page.value" :total-pages="pagination.totalPages.value" :total-elements="pagination.totalElements.value" :page-size="pagination.size.value" @update:page="pagination.setPage" @update:size="pagination.setSize" />
       </div>
     </div>
 
     <BaseModal v-model="showModal" :title="isEdit ? t('cities.editCity') : t('cities.addCity')" size="lg">
       <form @submit.prevent="handleSave" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseInput v-model="form.name" :label="t('cities.cityName') + ' *'" required />
-          <BaseInput v-model="form.region" :label="t('cities.region') + ' *'" required />
+          <BaseInput v-model="form.name" :label="t('cities.cityName')" required />
+          <BaseInput v-model="form.region" :label="t('cities.region')" required />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseInput v-model="form.population" type="number" :label="t('cities.population')" />
-          <BaseInput v-model="form.area" type="number" :label="t('cities.area')" />
+          <BaseInput v-model="form.population" type="number" min="1" :label="t('cities.population')" />
+          <BaseInput v-model="form.area" type="number" min="1" :label="t('cities.area')" />
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('cities.map') }}</label>
@@ -189,7 +208,8 @@ async function confirmDelete() {
     </BaseModal>
 
     <ConfirmDialog
-      v-model="itemToDelete !== null"
+      :model-value="itemToDelete !== null"
+      @update:modelValue="(val: boolean) => { if (!val) itemToDelete = null }"
       :title="t('cities.deleteConfirmTitle')"
       :message="t('cities.deleteConfirmDesc')"
       @confirm="confirmDelete"

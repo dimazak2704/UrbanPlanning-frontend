@@ -32,19 +32,37 @@ const attrs = useAttrs()
 const inputId = computed(() => props.id || `input-${Math.random().toString(36).slice(2, 9)}`)
 
 const inputClasses = computed(() => [
-  'block w-full rounded-lg border px-3 py-2 text-sm transition-colors duration-150',
-  'placeholder:text-slate-400',
-  'focus:outline-none focus:ring-2 focus:ring-offset-0',
-  'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
+  'block w-full border-b bg-transparent px-0 py-3 text-base leading-relaxed transition-colors duration-300',
+  'placeholder:text-ink-subtle dark:placeholder:text-paper/45',
+  'focus:outline-none',
+  'disabled:opacity-60 disabled:cursor-not-allowed',
   props.error
-    ? 'border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500'
-    : 'border-slate-300 text-slate-900 focus:border-primary-500 focus:ring-primary-500',
+    ? 'border-status-suspended text-status-suspended dark:text-red-300'
+    : 'border-ink/20 text-ink focus:border-ink dark:border-paper/25 dark:text-paper dark:focus:border-paper',
 ])
 
 function onInput(event: Event) {
   const target = event.target as HTMLInputElement
-  const value = props.type === 'number' ? Number(target.value) : target.value
+  if (props.type === 'number') {
+    if (target.value === '') {
+      emit('update:modelValue', '')
+      return
+    }
+    emit('update:modelValue', Number(target.value))
+    return
+  }
+  const value = target.value
   emit('update:modelValue', value)
+}
+
+function onKeyDown(event: KeyboardEvent) {
+  if (props.type !== 'number') return
+  const minAttr = (attrs.min as string | number | undefined)
+  if (minAttr === undefined) return
+  const min = Number(minAttr)
+  if (!Number.isNaN(min) && min >= 0 && event.key === '-') {
+    event.preventDefault()
+  }
 }
 </script>
 
@@ -53,7 +71,7 @@ function onInput(event: Event) {
     <label
       v-if="label"
       :for="inputId"
-      class="block text-sm font-medium text-slate-700 mb-1"
+      class="mb-2 block text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65"
     >
       {{ label }}
       <span v-if="required" class="text-red-500 ml-0.5">*</span>
@@ -67,11 +85,12 @@ function onInput(event: Event) {
       :required="required"
       :class="inputClasses"
       v-bind="attrs"
+      @keydown="onKeyDown"
       @input="onInput"
     />
     <p
       v-if="error"
-      class="mt-1 text-sm text-red-600"
+      class="mt-2 text-xs font-mono uppercase tracking-widest text-status-suspended"
     >
       {{ error }}
     </p>

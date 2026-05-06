@@ -5,16 +5,16 @@ import {
   ListboxOptions,
   ListboxOption,
 } from '@headlessui/vue'
-import { ChevronUpDownIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { PhCaretUpDown, PhCheck } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 
 interface SelectOption {
-  value: string | number
+  value: string | number | boolean
   label: string
 }
 
 interface Props {
-  modelValue: string | number | null
+  modelValue: string | number | boolean | null
   options: SelectOption[]
   placeholder?: string
   label?: string
@@ -31,14 +31,14 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string | number | null): void
+  (e: 'update:modelValue', value: string | number | boolean | null): void
 }>()
 
 const selectedOption = computed(() =>
   props.options.find((o) => o.value === props.modelValue),
 )
 
-function onSelect(value: string | number | null) {
+function onSelect(value: string | number | boolean | null) {
   emit('update:modelValue', value)
 }
 </script>
@@ -47,7 +47,7 @@ function onSelect(value: string | number | null) {
   <div>
     <label
       v-if="label"
-      class="block text-sm font-medium text-slate-700 mb-1"
+      class="mb-2 block text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65"
     >
       {{ label }}
     </label>
@@ -58,17 +58,17 @@ function onSelect(value: string | number | null) {
     >
       <div class="relative">
         <ListboxButton
-          class="relative w-full cursor-pointer rounded-lg border bg-white py-2 pl-3 pr-10 text-left text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 disabled:cursor-not-allowed disabled:bg-slate-50"
-          :class="error ? 'border-red-300' : 'border-slate-300'"
+          class="relative w-full cursor-pointer border-b bg-transparent py-3 pl-0 pr-9 text-left text-base leading-relaxed transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          :class="error ? 'border-status-suspended text-status-suspended' : 'border-ink/20 text-ink hover:border-ink focus:border-ink dark:border-paper/25 dark:text-paper dark:hover:border-paper dark:focus:border-paper'"
         >
           <span
-            :class="selectedOption ? 'text-slate-900' : 'text-slate-400'"
+            :class="selectedOption ? '' : 'text-ink-subtle dark:text-paper/45'"
             class="block truncate"
           >
             {{ selectedOption?.label || placeholder }}
           </span>
-          <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-            <ChevronUpDownIcon class="h-4 w-4 text-slate-400" />
+          <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center">
+            <PhCaretUpDown :size="18" weight="light" class="text-ink-muted dark:text-paper/65" />
           </span>
         </ListboxButton>
 
@@ -78,7 +78,7 @@ function onSelect(value: string | number | null) {
           leave-to-class="opacity-0"
         >
           <ListboxOptions
-            class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg focus:outline-none"
+            class="absolute z-50 mt-2 max-h-72 w-full overflow-auto border border-ink/15 bg-paper-pure py-1 focus:outline-none dark:border-night-border dark:bg-night-soft"
           >
             <ListboxOption
               v-if="placeholder"
@@ -88,8 +88,8 @@ function onSelect(value: string | number | null) {
             >
               <div
                 :class="[
-                  active ? 'bg-slate-50' : '',
-                  'px-3 py-2 text-sm text-slate-400',
+                  active ? 'bg-paper-warm dark:bg-night-elevated' : '',
+                  'px-4 py-3 text-sm text-ink-subtle dark:text-paper/45',
                 ]"
               >
                 {{ placeholder }}
@@ -104,16 +104,18 @@ function onSelect(value: string | number | null) {
             >
               <div
                 :class="[
-                  active ? 'bg-primary-50 text-primary-700' : 'text-slate-900',
-                  'flex items-center justify-between px-3 py-2 text-sm',
+                  active ? 'bg-paper-warm dark:bg-night-elevated' : 'text-ink dark:text-paper',
+                  'flex items-center justify-between px-4 py-3 text-sm',
                 ]"
               >
-                <span :class="selected ? 'font-medium' : 'font-normal'" class="block truncate">
+                <span :class="selected ? 'font-medium' : 'font-normal'" class="block truncate font-sans">
                   {{ option.label }}
                 </span>
-                <CheckIcon
+                <PhCheck
                   v-if="selected"
-                  class="h-4 w-4 text-primary-600 shrink-0"
+                  :size="16"
+                  weight="light"
+                  class="shrink-0 text-accent"
                 />
               </div>
             </ListboxOption>
@@ -121,6 +123,6 @@ function onSelect(value: string | number | null) {
         </transition>
       </div>
     </Listbox>
-    <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
+    <p v-if="error" class="mt-2 text-xs font-mono uppercase tracking-widest text-status-suspended">{{ error }}</p>
   </div>
 </template>

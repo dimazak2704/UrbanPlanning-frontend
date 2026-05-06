@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
 
   // Districts
   {
+    path: '/districts',
+    name: 'districts',
+    component: () => import('@/pages/districts/DistrictsListPage.vue'),
+    meta: { title: 'titles.districts' },
+  },
+  {
     path: '/districts/:id',
     name: 'district-detail',
     component: () => import('@/pages/districts/DistrictDetailPage.vue'),

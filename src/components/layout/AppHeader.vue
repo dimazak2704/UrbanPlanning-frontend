@@ -1,25 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { RouterLink, useRouter, useRoute } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { setLocale, getCurrentLocale, type SupportedLocale } from '@/i18n'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import {
-  Bars3Icon,
-  XMarkIcon,
-  UserCircleIcon,
-  ArrowRightOnRectangleIcon,
-  Cog6ToothIcon,
-  ChevronDownIcon,
-} from '@heroicons/vue/24/outline'
-import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
+import { PhList, PhMoon, PhSignIn, PhSignOut, PhSun, PhX } from '@phosphor-icons/vue'
 import { useAuthStore } from '@/stores/auth.store'
+import { useTheme } from '@/composables/useTheme'
 
 const auth = useAuthStore()
 const router = useRouter()
-const route = useRoute()
 const { t } = useI18n()
 const mobileMenuOpen = ref(false)
+const isScrolled = ref(false)
+const { theme, resolvedTheme, cycleTheme } = useTheme()
 
 const currentLang = ref<SupportedLocale>(getCurrentLocale())
 
@@ -38,6 +31,7 @@ const navLinks = computed(() => [
   { label: t('header.home'), to: '/' },
   { label: t('header.map'), to: '/map' },
   { label: t('header.cities'), to: '/cities' },
+  { label: t('header.districts'), to: '/districts' },
   { label: t('header.projects'), to: '/projects' },
   { label: t('header.infrastructures'), to: '/infrastructures' },
   { label: t('header.architects'), to: '/architects' },
@@ -57,192 +51,154 @@ async function handleLogout() {
 function closeMobile() {
   mobileMenuOpen.value = false
 }
+
+function onScroll() {
+  isScrolled.value = window.scrollY > 10
+}
+
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-      <!-- Logo -->
-      <RouterLink to="/" class="flex items-center gap-2.5 shrink-0">
-        <BuildingOffice2Icon class="h-8 w-8 text-primary-600" />
-        <span class="text-lg font-bold text-slate-900 hidden sm:block">
-          Urban<span class="text-primary-600">Plan</span>
-        </span>
+  <header
+    class="sticky top-0 z-50 h-20 border-b transition-colors duration-300"
+    :class="isScrolled ? 'border-ink/10 bg-paper/85 backdrop-blur-md dark:border-night-border dark:bg-night/85' : 'border-transparent bg-transparent'"
+  >
+    <div class="container-app flex h-20 items-center justify-between gap-4">
+      <RouterLink to="/" class="flex shrink-0 items-center gap-4">
+        <span class="font-serif text-3xl uppercase tracking-[0.02em] text-ink dark:text-paper">UP</span>
+        <span class="h-8 w-px bg-ink/20 dark:bg-paper/30" />
       </RouterLink>
 
-      <!-- Desktop Nav -->
-      <nav class="hidden lg:flex items-center gap-1">
+      <div class="hidden flex-1 lg:block" />
+
+      <nav class="hidden items-center gap-1 text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65 lg:flex">
         <RouterLink
           v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-          active-class="!bg-primary-50 !text-primary-700"
+          class="border-l border-ink/10 px-3 py-1 transition-colors hover:text-ink first:border-l-0 dark:border-paper/20 dark:hover:text-paper"
+          active-class="!text-ink dark:!text-paper"
         >
           {{ link.label }}
         </RouterLink>
-      </nav>
-
-      <!-- Right side -->
-      <div class="flex items-center gap-3">
-        <!-- Language Switcher -->
         <button
-          @click="toggleLanguage"
-          class="flex items-center justify-center h-9 w-12 rounded-lg bg-slate-100 text-lg hover:bg-slate-200 transition-colors"
+          type="button"
+          class="border-l border-ink/10 px-3 py-1 transition-colors hover:text-ink dark:border-paper/20 dark:hover:text-paper"
           :title="t('header.language')"
+          @click="toggleLanguage"
         >
-          {{ currentLang === 'uk' ? '🇺🇦' : '🇬🇧' }}
+          {{ currentLang.toUpperCase() }}
         </button>
-
-        <!-- Not auth: login button -->
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 border-l border-ink/10 px-3 py-1 transition-colors hover:text-ink dark:border-paper/20 dark:hover:text-paper"
+          :title="t('header.theme')"
+          @click="cycleTheme"
+        >
+          <PhSun v-if="resolvedTheme === 'light'" :size="14" weight="light" />
+          <PhMoon v-else :size="14" weight="light" />
+          {{ theme }}
+        </button>
         <RouterLink
           v-if="!auth.isAuthenticated"
           to="/login"
-          class="hidden sm:inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          class="inline-flex items-center gap-2 border-l border-ink/10 px-3 py-1 transition-colors hover:text-ink dark:border-paper/20 dark:hover:text-paper"
         >
-          <ArrowRightOnRectangleIcon class="h-4 w-4" />
+          <PhSignIn :size="14" weight="light" />
           {{ t('auth.login') }}
         </RouterLink>
-
-        <!-- Auth: user dropdown -->
-        <Menu v-if="auth.isAuthenticated" as="div" class="relative">
-          <MenuButton
-            class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors hover:bg-slate-100"
-            :class="(route.path.startsWith('/me') || route.path.startsWith('/admin')) ? 'bg-primary-50 text-primary-700' : 'text-slate-700'"
+        <template v-else>
+          <RouterLink to="/me" class="border-l border-ink/10 px-3 py-1 transition-colors hover:text-ink dark:border-paper/20 dark:hover:text-paper">
+            {{ t('header.cabinet') }}
+          </RouterLink>
+          <RouterLink
+            v-if="auth.isAdmin"
+            to="/admin/users"
+            class="border-l border-ink/10 px-3 py-1 transition-colors hover:text-ink dark:border-paper/20 dark:hover:text-paper"
           >
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-700"
-            >
-              {{ getUserInitials() }}
-            </span>
-            <span class="hidden sm:block max-w-[120px] truncate">{{ auth.user?.email }}</span>
-            <ChevronDownIcon class="h-4 w-4 text-slate-400" />
-          </MenuButton>
-
-          <transition
-            enter-active-class="transition duration-100 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-75 ease-in"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
+            {{ t('header.admin') }}
+          </RouterLink>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 border-l border-ink/10 px-3 py-1 whitespace-nowrap transition-colors hover:text-ink dark:border-paper/20 dark:hover:text-paper"
+            @click="handleLogout"
           >
-            <MenuItems
-              class="absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
-            >
-              <div class="p-1.5">
-                <MenuItem v-slot="{ active }">
-                  <RouterLink
-                    to="/me"
-                    :class="[
-                      active ? 'bg-slate-50' : '',
-                      'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-700',
-                    ]"
-                  >
-                    <UserCircleIcon class="h-4 w-4 text-slate-400" />
-                    {{ t('header.cabinet') }}
-                  </RouterLink>
-                </MenuItem>
+            <PhSignOut :size="14" weight="light" />
+            {{ t('auth.logout') }}
+          </button>
+        </template>
+      </nav>
 
-                <MenuItem v-if="auth.isAdmin" v-slot="{ active }">
-                  <RouterLink
-                    to="/admin/users"
-                    :class="[
-                      active ? 'bg-slate-50' : '',
-                      'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-700',
-                    ]"
-                  >
-                    <Cog6ToothIcon class="h-4 w-4 text-slate-400" />
-                    {{ t('header.admin') }}
-                  </RouterLink>
-                </MenuItem>
-
-                <div class="my-1 border-t border-slate-100" />
-
-                <MenuItem v-slot="{ active }">
-                  <button
-                    :class="[
-                      active ? 'bg-red-50' : '',
-                      'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600',
-                    ]"
-                    @click="handleLogout"
-                  >
-                    <ArrowRightOnRectangleIcon class="h-4 w-4" />
-                    {{ t('auth.logout') }}
-                  </button>
-                </MenuItem>
-              </div>
-            </MenuItems>
-          </transition>
-        </Menu>
-
-        <!-- Mobile hamburger -->
+      <div class="lg:hidden">
         <button
-          class="lg:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+          type="button"
+          class="inline-flex items-center border border-ink/20 p-2 text-ink dark:border-paper/30 dark:text-paper"
           @click="mobileMenuOpen = !mobileMenuOpen"
         >
-          <Bars3Icon v-if="!mobileMenuOpen" class="h-6 w-6" />
-          <XMarkIcon v-else class="h-6 w-6" />
+          <PhList v-if="!mobileMenuOpen" :size="20" weight="light" />
+          <PhX v-else :size="20" weight="light" />
         </button>
       </div>
     </div>
 
-    <!-- Mobile menu -->
     <transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
-      <div
-        v-if="mobileMenuOpen"
-        class="border-t border-slate-200 bg-white px-4 pb-4 pt-2 lg:hidden"
-      >
-        <nav class="space-y-1">
+      <div v-if="mobileMenuOpen" class="fixed inset-0 z-40 bg-paper/95 px-6 pb-10 pt-28 dark:bg-night/95 lg:hidden">
+        <nav class="space-y-6">
           <RouterLink
             v-for="link in navLinks"
             :key="link.to"
             :to="link.to"
-            class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            active-class="!bg-primary-50 !text-primary-700"
+            class="block font-serif text-4xl tracking-tight text-ink transition-colors hover:text-accent dark:text-paper"
             @click="closeMobile"
           >
             {{ link.label }}
           </RouterLink>
-
-          <div class="border-t border-slate-100 pt-2 mt-2">
+          <div class="mt-10 border-t border-ink/10 pt-6 dark:border-night-border">
+            <div class="mb-6 flex items-center gap-4 text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">
+              <button type="button" @click="toggleLanguage">{{ currentLang.toUpperCase() }}</button>
+              <span>·</span>
+              <button type="button" @click="cycleTheme">{{ theme }}</button>
+            </div>
             <RouterLink
               v-if="!auth.isAuthenticated"
               to="/login"
-              class="block rounded-lg px-3 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50"
+              class="inline-flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-ink dark:text-paper"
               @click="closeMobile"
             >
+              <PhSignIn :size="14" weight="light" />
               {{ t('auth.login') }}
             </RouterLink>
             <template v-else>
-              <RouterLink
-                to="/me"
-                class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
-                @click="closeMobile"
-              >
-                {{ t('header.cabinet') }}
-              </RouterLink>
-              <RouterLink
-                v-if="auth.isAdmin"
-                to="/admin/users"
-                class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
-                @click="closeMobile"
-              >
-                {{ t('header.admin') }}
-              </RouterLink>
-              <button
-                class="block w-full text-left rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-                @click="handleLogout"
-              >
-                {{ t('auth.logout') }}
-              </button>
+              <div class="text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65">
+                {{ getUserInitials() }} · {{ auth.user?.email }}
+              </div>
+              <div class="mt-4 flex flex-col gap-3 text-sm font-mono uppercase tracking-wider">
+                <RouterLink to="/me" class="text-ink dark:text-paper" @click="closeMobile">{{ t('header.cabinet') }}</RouterLink>
+                <RouterLink
+                  v-if="auth.isAdmin"
+                  to="/admin/users"
+                  class="text-ink dark:text-paper"
+                  @click="closeMobile"
+                >
+                  {{ t('header.admin') }}
+                </RouterLink>
+                <button type="button" class="text-left text-ink dark:text-paper" @click="handleLogout">{{ t('auth.logout') }}</button>
+              </div>
             </template>
           </div>
         </nav>

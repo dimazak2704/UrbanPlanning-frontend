@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { MapPinIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { PhMapPin, PhX } from '@phosphor-icons/vue'
 
 interface LatLng {
   lat: number
@@ -82,8 +82,8 @@ onMounted(() => {
   if (!mapContainer.value) return
   const center = props.modelValue ?? props.initialCenter
   map = L.map(mapContainer.value).setView([center.lat, center.lng], props.modelValue ? 14 : 6)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap © CARTO',
   }).addTo(map)
   map.on('click', onMapClick)
   if (props.modelValue) updateMarker(props.modelValue.lat, props.modelValue.lng)
@@ -94,27 +94,27 @@ onBeforeUnmount(() => { if (map) { map.remove(); map = null } })
 
 <template>
   <div class="space-y-3">
-    <div ref="mapContainer" class="h-[400px] rounded-xl border border-slate-200 overflow-hidden z-0" />
+    <div ref="mapContainer" class="z-0 h-[420px] overflow-hidden border border-ink/10 dark:border-night-border" />
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
       <div class="flex-1">
-        <label class="block text-sm font-medium text-slate-700 mb-1">Широта</label>
+        <label class="mb-2 block text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65">Широта</label>
         <input v-model="latInput" type="text" placeholder="49.000000"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none"
+          class="w-full border-b border-ink/20 bg-transparent px-0 py-3 text-base text-ink focus:border-ink focus:outline-none dark:border-paper/30 dark:text-paper dark:focus:border-paper"
           @change="onInputChange" />
       </div>
       <div class="flex-1">
-        <label class="block text-sm font-medium text-slate-700 mb-1">Довгота</label>
+        <label class="mb-2 block text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65">Довгота</label>
         <input v-model="lngInput" type="text" placeholder="32.000000"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none"
+          class="w-full border-b border-ink/20 bg-transparent px-0 py-3 text-base text-ink focus:border-ink focus:outline-none dark:border-paper/30 dark:text-paper dark:focus:border-paper"
           @change="onInputChange" />
       </div>
       <button type="button" @click="getMyLocation"
-        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-        <MapPinIcon class="h-4 w-4" /> Моя локація
+        class="inline-flex items-center gap-2 border border-ink px-5 py-3 text-xs font-mono uppercase tracking-wider text-ink transition-colors hover:bg-ink hover:text-paper dark:border-paper dark:text-paper dark:hover:bg-paper dark:hover:text-night">
+        <PhMapPin :size="14" weight="light" /> Моя локація
       </button>
       <button type="button" @click="clearLocation"
-        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-        <XMarkIcon class="h-4 w-4" /> Очистити
+        class="inline-flex items-center gap-2 border border-ink/20 px-5 py-3 text-xs font-mono uppercase tracking-wider text-ink-muted transition-colors hover:border-ink hover:text-ink dark:border-paper/30 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper">
+        <PhX :size="14" weight="light" /> Очистити
       </button>
     </div>
   </div>

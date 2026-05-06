@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useDark } from '@vueuse/core'
 import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -27,10 +28,16 @@ const props = withDefaults(defineProps<Props>(), {
   title: '',
   horizontal: false,
 })
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'class',
+  valueDark: 'dark',
+  valueLight: '',
+})
 
 const COLORS = [
-  '#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#10b981',
-  '#8b5cf6', '#06b6d4', '#f97316', '#ec4899', '#64748b',
+  '#B8533A', '#2D5F8B', '#3A6B3A', '#8B2D2D', '#6B6B6B',
+  '#7C5A3A', '#4A5D70', '#5E6B4A', '#7A4747', '#545454',
 ]
 
 const chartData = computed(() => ({
@@ -39,7 +46,7 @@ const chartData = computed(() => ({
     {
       data: props.data.map((d) => d.value),
       backgroundColor: COLORS.slice(0, props.data.length),
-      borderRadius: 6,
+      borderRadius: 0,
       borderSkipped: false as const,
       maxBarThickness: 48,
     },
@@ -53,21 +60,21 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: '#1e293b',
-      titleFont: { family: 'Inter', size: 13 },
-      bodyFont: { family: 'Inter', size: 12 },
+      backgroundColor: isDark.value ? '#242424' : '#0A0A0A',
+      titleFont: { family: 'Inter', size: 12 },
+      bodyFont: { family: 'Inter', size: 11 },
       padding: 12,
-      cornerRadius: 8,
+      cornerRadius: 0,
     },
   },
   scales: {
     x: {
-      grid: { display: false },
-      ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8' },
+      grid: { color: isDark.value ? 'rgba(250,250,247,0.12)' : 'rgba(10,10,10,0.12)', borderDash: [2, 4] },
+      ticks: { font: { family: 'JetBrains Mono', size: 13 }, color: isDark.value ? '#C7C7C5' : '#6B6B6B' },
     },
     y: {
-      grid: { color: '#f1f5f9' },
-      ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8' },
+      grid: { color: isDark.value ? 'rgba(250,250,247,0.12)' : 'rgba(10,10,10,0.12)', borderDash: [2, 4] },
+      ticks: { font: { family: 'JetBrains Mono', size: 13 }, color: isDark.value ? '#C7C7C5' : '#6B6B6B' },
       beginAtZero: true,
     },
   },
@@ -75,11 +82,11 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-5">
-    <h3 v-if="title" class="mb-4 text-base font-semibold text-slate-900">{{ title }}</h3>
+  <div class="border border-ink/10 bg-paper-pure p-5 dark:border-night-border dark:bg-night-soft">
+    <h3 v-if="title" class="mb-4 font-serif text-xl font-medium tracking-tight text-ink dark:text-paper">{{ title }}</h3>
     <div class="h-64">
       <Bar v-if="data.length > 0" :data="chartData" :options="chartOptions" />
-      <div v-else class="flex h-full items-center justify-center text-sm text-slate-400">
+      <div v-else class="flex h-full items-center justify-center text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">
         Немає даних
       </div>
     </div>

@@ -6,7 +6,7 @@ import BaseBadge from '@/components/common/BaseBadge.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
 import { getProjectStatusColor } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
-import { MapPinIcon, UserIcon, ArrowRightIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { PhArrowRight, PhMapPin, PhPencilSimple, PhTrash, PhUser } from '@phosphor-icons/vue'
 
 interface Props {
   project: Project
@@ -26,51 +26,57 @@ const { t } = useI18n()
 <template>
   <RouterLink
     :to="`/projects/${project.id}`"
-    class="group block rounded-xl border border-slate-200 bg-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:border-primary-200 hover:-translate-y-0.5 relative"
+    class="card-unified group"
   >
-    <div v-if="showActions" class="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <button @click.prevent="emit('edit', project)" class="rounded-lg bg-white/90 p-1.5 text-slate-700 hover:bg-white hover:text-primary-600 shadow-sm backdrop-blur-sm transition-colors">
-        <PencilSquareIcon class="h-4 w-4" />
+    <div v-if="showActions" class="absolute right-3 top-3 z-10 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <button @click.prevent="emit('edit', project)" class="border border-ink/15 bg-paper/90 p-2 text-ink-muted transition-colors hover:border-ink hover:text-ink dark:border-paper/30 dark:bg-night/85 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper">
+        <PhPencilSimple :size="14" weight="light" />
       </button>
-      <button @click.prevent="emit('delete', project)" class="rounded-lg bg-white/90 p-1.5 text-slate-700 hover:bg-white hover:text-red-600 shadow-sm backdrop-blur-sm transition-colors">
-        <TrashIcon class="h-4 w-4" />
+      <button @click.prevent="emit('delete', project)" class="border border-ink/15 bg-paper/90 p-2 text-ink-muted transition-colors hover:border-status-suspended hover:text-status-suspended dark:border-paper/30 dark:bg-night/85 dark:text-paper/65">
+        <PhTrash :size="14" weight="light" />
       </button>
     </div>
 
     <ImageWithFallback
       :src="project.imageUrl"
       :alt="project.name"
-      fallback-class="h-44 w-full"
+      fallback-class="h-56 w-full"
     />
 
-    <div class="p-5">
-      <div class="flex items-start justify-between gap-2 mb-3">
-        <h3 class="text-base font-semibold text-slate-900 line-clamp-1 group-hover:text-primary-700 transition-colors pr-6">
-          {{ project.name }}
-        </h3>
+    <div class="space-y-4 p-6">
+      <div class="flex items-center justify-between gap-3 border-b border-ink/10 pb-3 dark:border-night-border">
         <BaseBadge :custom-class="getProjectStatusColor(project.status)">
           {{ t(`enums.projectStatus.${project.status}`) }}
         </BaseBadge>
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">
+          {{ project.updatedAt?.slice(0, 10) }}
+        </p>
       </div>
 
-      <div class="space-y-2 text-sm text-slate-500">
-        <div class="flex items-center gap-1.5">
-          <MapPinIcon class="h-4 w-4 shrink-0 text-slate-400" />
+      <div class="flex items-start justify-between gap-3">
+        <h3 class="line-clamp-2 font-serif text-xl font-medium leading-tight tracking-tight text-ink transition-colors group-hover:text-accent dark:text-paper">
+          {{ project.name }}
+        </h3>
+      </div>
+
+      <div class="space-y-2 text-sm text-ink-muted dark:text-paper/70">
+        <div class="flex items-center gap-2">
+          <PhMapPin :size="15" weight="light" class="shrink-0" />
           <span class="truncate">{{ project.cityName }}, {{ project.districtName }}</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <UserIcon class="h-4 w-4 shrink-0 text-slate-400" />
+        <div class="flex items-center gap-2">
+          <PhUser :size="15" weight="light" class="shrink-0" />
           <span class="truncate">{{ project.architectFullName }}</span>
         </div>
       </div>
 
-      <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-        <span class="text-sm font-semibold text-slate-900">
+      <div class="flex items-center justify-between border-t border-ink/10 pt-4 dark:border-night-border">
+        <span class="text-sm font-mono uppercase tracking-wider text-ink dark:text-paper">
           {{ formatCurrency(project.budget) }}
         </span>
-        <span class="flex items-center gap-1 text-xs font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span class="flex items-center gap-1 text-xs font-mono uppercase tracking-[0.14em] text-ink-muted opacity-0 transition-opacity group-hover:opacity-100 dark:text-paper/65">
           {{ t('common.details') }}
-          <ArrowRightIcon class="h-3.5 w-3.5" />
+          <PhArrowRight :size="12" weight="light" />
         </span>
       </div>
     </div>

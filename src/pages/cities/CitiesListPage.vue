@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { PlusIcon } from '@heroicons/vue/24/outline'
+import { PhPlus } from '@phosphor-icons/vue'
 
 import BaseInput from '@/components/common/BaseInput.vue'
 import CityCard from '@/components/cards/CityCard.vue'
@@ -75,12 +75,12 @@ onMounted(fetchCities)
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+  <div class="container-app py-12 md:py-16">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">{{ t('cities.title') }}</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">— 03 CITIES</p>
+        <h1 class="mt-2 text-4xl font-serif font-medium tracking-tight">{{ t('cities.title') }}</h1>
+        <p class="mt-2 text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">
           {{ t('cities.totalCount', { count: pagination.totalElements.value }) }}
         </p>
       </div>
@@ -91,16 +91,15 @@ onMounted(fetchCities)
         <RouterLink
           v-if="auth.isAdmin"
           to="/admin/cities?action=new"
-          class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700"
+          class="inline-flex items-center gap-2 border border-ink bg-ink px-6 py-3 text-xs font-mono uppercase tracking-wider text-paper transition-colors hover:bg-accent hover:border-accent dark:border-paper dark:bg-paper dark:text-night"
         >
-          <PlusIcon class="h-4 w-4" />
+          <PhPlus :size="14" weight="light" />
           {{ t('cities.addCity') }}
         </RouterLink>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-6">
+    <div class="mb-8">
       <FilterPanel :has-active-filters="hasActiveFilters" @clear="clearFilters">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <BaseInput
@@ -117,19 +116,20 @@ onMounted(fetchCities)
             v-model="filters.minPopulation"
             :label="t('cities.populationFrom')"
             type="number"
-            placeholder="0"
+            min="1"
+            placeholder="1"
           />
           <BaseInput
             v-model="filters.maxPopulation"
             :label="t('cities.populationTo')"
             type="number"
+            min="1"
             placeholder="10 000 000"
           />
         </div>
       </FilterPanel>
     </div>
 
-    <!-- Loading -->
     <div v-if="pagination.loading.value" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       <SkeletonCard v-for="i in 6" :key="i" />
     </div>
@@ -141,12 +141,10 @@ onMounted(fetchCities)
       :description="t('cities.notFoundDescription')"
     />
 
-    <!-- Grid -->
-    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       <CityCard v-for="city in cities" :key="city.id" :city="city" />
     </div>
 
-    <!-- Pagination -->
     <div v-if="!pagination.loading.value && cities.length > 0" class="mt-8">
       <Pagination
         :current-page="pagination.page.value"

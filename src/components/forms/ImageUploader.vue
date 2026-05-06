@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { CloudArrowUpIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/outline'
+import { computed, ref } from 'vue'
+import { PhTrash, PhUploadSimple } from '@phosphor-icons/vue'
 import { uploadAvatar, uploadProjectImage, uploadInfrastructureImage } from '@/api/files.api'
 import { useToastStore } from '@/stores/toast.store'
+import { resolveMediaUrl } from '@/utils/media-url'
 
 interface Props {
   modelValue: string | null
@@ -24,6 +25,8 @@ const uploadFn = {
   projects: uploadProjectImage,
   infrastructures: uploadInfrastructureImage,
 }
+
+const previewSrc = computed(() => resolveMediaUrl(props.modelValue))
 
 async function handleFile(file: File) {
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -65,30 +68,26 @@ function removeImage() {
 <template>
   <div>
     <div v-if="modelValue" class="relative group">
-      <img :src="modelValue" alt="Preview" class="h-48 w-full rounded-xl object-cover border border-slate-200" />
+      <img :src="previewSrc || ''" alt="Preview" class="h-64 w-full border border-ink/10 object-cover dark:border-night-border" />
       <button type="button" @click="removeImage"
-        class="absolute top-2 right-2 rounded-lg bg-red-600 p-1.5 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-700">
-        <TrashIcon class="h-4 w-4" />
+        class="absolute right-3 top-3 border border-status-suspended/60 bg-paper/90 p-2 text-status-suspended opacity-0 transition-opacity group-hover:opacity-100 dark:bg-night/90">
+        <PhTrash :size="14" weight="light" />
       </button>
     </div>
     <div v-else
-      :class="['relative rounded-xl border-2 border-dashed transition-colors p-8 text-center cursor-pointer', dragOver ? 'border-primary-500 bg-primary-50' : 'border-slate-300 hover:border-primary-400']"
+      :class="['relative cursor-pointer border-2 border-dashed p-10 text-center transition-colors', dragOver ? 'border-accent bg-accent-soft/40' : 'border-ink/20 hover:border-ink dark:border-paper/30 dark:hover:border-paper']"
       @dragover.prevent="dragOver = true" @dragleave="dragOver = false" @drop.prevent="onDrop"
       @click="fileInput?.click()">
       <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
       <div v-if="uploading" class="flex flex-col items-center gap-2">
-        <svg class="animate-spin h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        <span class="text-sm text-slate-500">Завантаження...</span>
+        <span class="animate-pulse text-sm font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">Loading...</span>
       </div>
       <div v-else class="flex flex-col items-center gap-2">
-        <div class="rounded-full bg-slate-100 p-3">
-          <CloudArrowUpIcon class="h-8 w-8 text-slate-400" />
+        <div class="border border-ink/15 p-3 dark:border-paper/25">
+          <PhUploadSimple :size="28" weight="light" class="text-ink-muted dark:text-paper/65" />
         </div>
-        <p class="text-sm font-medium text-slate-700">Перетягніть фото або натисніть</p>
-        <p class="text-xs text-slate-400">JPG, PNG, WebP до 5 МБ</p>
+        <p class="text-sm font-mono uppercase tracking-[0.16em] text-ink dark:text-paper">Перетягніть фото або натисніть</p>
+        <p class="text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">JPG, PNG, WebP до 5 МБ</p>
       </div>
     </div>
   </div>

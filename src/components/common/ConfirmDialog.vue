@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import BaseModal from './BaseModal.vue';
-import BaseButton from './BaseButton.vue';
-import { useI18n } from 'vue-i18n';
-import { ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+import BaseModal from './BaseModal.vue'
+import BaseButton from './BaseButton.vue'
+import { useI18n } from 'vue-i18n'
+import { PhInfo, PhWarningCircle } from '@phosphor-icons/vue'
 
 interface Props {
-  modelValue: boolean;
-  title: string;
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  variant?: 'danger' | 'warning' | 'info';
-  loading?: boolean;
+  modelValue: boolean
+  title: string
+  message: string
+  confirmLabel?: string
+  cancelLabel?: string
+  variant?: 'danger' | 'warning' | 'info'
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,24 +19,24 @@ const props = withDefaults(defineProps<Props>(), {
   cancelLabel: '',
   variant: 'danger',
   loading: false,
-});
+})
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
-  (e: 'confirm'): void;
-  (e: 'cancel'): void;
-}>();
+  (e: 'update:modelValue', value: boolean): void
+  (e: 'confirm'): void
+  (e: 'cancel'): void
+}>()
 
 const close = () => {
-  emit('update:modelValue', false);
-  emit('cancel');
-};
+  emit('update:modelValue', false)
+  emit('cancel')
+}
 
 const confirm = () => {
-  emit('confirm');
-};
+  emit('confirm')
+}
 </script>
 
 <template>
@@ -46,31 +46,29 @@ const confirm = () => {
     :title="title"
     size="sm"
   >
-    <div class="flex items-start gap-4">
+    <div class="flex items-start gap-5">
       <div
-        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
+        class="flex h-12 w-12 flex-shrink-0 items-center justify-center border"
         :class="{
-          'bg-red-100': variant === 'danger',
-          'bg-amber-100': variant === 'warning',
-          'bg-blue-100': variant === 'info',
+          'border-status-suspended/40 text-status-suspended': variant === 'danger',
+          'border-status-construction/40 text-status-construction': variant === 'warning',
+          'border-status-approved/40 text-status-approved': variant === 'info',
         }"
       >
-        <ExclamationTriangleIcon
+        <PhWarningCircle
           v-if="variant === 'danger' || variant === 'warning'"
-          class="h-6 w-6"
-          :class="{
-            'text-red-600': variant === 'danger',
-            'text-amber-600': variant === 'warning',
-          }"
+          :size="22"
+          weight="light"
           aria-hidden="true"
         />
-        <InformationCircleIcon
+        <PhInfo
           v-else
-          class="h-6 w-6 text-blue-600"
+          :size="22"
+          weight="light"
           aria-hidden="true"
         />
       </div>
-      <div class="mt-2 text-sm text-slate-500">
+      <div class="mt-1 text-base leading-relaxed text-ink-muted dark:text-paper/70">
         <p>{{ message }}</p>
       </div>
     </div>

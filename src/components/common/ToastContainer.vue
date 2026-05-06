@@ -2,35 +2,35 @@
 import { useToastStore } from '@/stores/toast.store'
 import type { Toast } from '@/stores/toast.store'
 import {
-  CheckCircleIcon,
-  XCircleIcon,
-  InformationCircleIcon,
-  XMarkIcon,
-} from '@heroicons/vue/24/outline'
+  PhCheckCircle,
+  PhInfo,
+  PhWarningCircle,
+  PhX,
+} from '@phosphor-icons/vue'
 
 const toastStore = useToastStore()
 
-const iconMap: Record<Toast['type'], typeof CheckCircleIcon> = {
-  success: CheckCircleIcon,
-  error: XCircleIcon,
-  info: InformationCircleIcon,
+const iconMap: Record<Toast['type'], typeof PhCheckCircle> = {
+  success: PhCheckCircle,
+  error: PhWarningCircle,
+  info: PhInfo,
 }
 
 const colorMap: Record<Toast['type'], string> = {
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  error: 'border-red-200 bg-red-50 text-red-800',
-  info: 'border-primary-200 bg-primary-50 text-primary-800',
+  success: 'border-status-completed/40 bg-paper-pure text-ink dark:bg-night-soft dark:text-paper',
+  error: 'border-status-suspended/45 bg-paper-pure text-ink dark:bg-night-soft dark:text-paper',
+  info: 'border-status-approved/40 bg-paper-pure text-ink dark:bg-night-soft dark:text-paper',
 }
 
 const iconColorMap: Record<Toast['type'], string> = {
-  success: 'text-emerald-500',
-  error: 'text-red-500',
-  info: 'text-primary-500',
+  success: 'text-status-completed',
+  error: 'text-status-suspended',
+  info: 'text-status-approved',
 }
 </script>
 
 <template>
-  <div class="fixed top-4 right-4 z-[100] flex flex-col gap-3 w-80">
+  <div class="fixed right-4 top-4 z-[100] flex w-80 flex-col gap-3">
     <TransitionGroup
       enter-active-class="transition duration-300 ease-out"
       enter-from-class="translate-x-full opacity-0"
@@ -43,21 +43,23 @@ const iconColorMap: Record<Toast['type'], string> = {
         v-for="toast in toastStore.toasts"
         :key="toast.id"
         :class="[
-          'flex items-start gap-3 rounded-xl border p-4 shadow-lg backdrop-blur-sm',
+          'flex items-start gap-3 border p-4',
           colorMap[toast.type],
         ]"
       >
         <component
           :is="iconMap[toast.type]"
-          class="h-5 w-5 shrink-0 mt-0.5"
+          class="mt-0.5 h-5 w-5 shrink-0"
           :class="iconColorMap[toast.type]"
+          :size="20"
+          weight="light"
         />
-        <p class="flex-1 text-sm font-medium">{{ toast.message }}</p>
+        <p class="flex-1 text-sm leading-relaxed">{{ toast.message }}</p>
         <button
-          class="shrink-0 rounded-lg p-0.5 opacity-60 hover:opacity-100 transition-opacity"
+          class="shrink-0 border border-ink/15 p-1 text-ink-muted transition-colors hover:border-ink hover:text-ink dark:border-paper/25 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper"
           @click="toastStore.removeToast(toast.id)"
         >
-          <XMarkIcon class="h-4 w-4" />
+          <PhX :size="12" weight="light" />
         </button>
       </div>
     </TransitionGroup>
