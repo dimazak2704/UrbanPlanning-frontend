@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import BaseSelect from '@/components/common/BaseSelect.vue'
@@ -9,10 +10,11 @@ import { getCities } from '@/api/cities.api'
 import { useDebounce } from '@/composables/useDebounce'
 import { PROJECT_STATUS_LABELS, INFRASTRUCTURE_TYPE_LABELS, INFRASTRUCTURE_STATUS_LABELS } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
-import type { CityMarker, ProjectMarker, InfrastructureMarker, MapBounds } from '@/types/map'
+import type { CityMapMarker, ProjectMapMarker, InfrastructureMapMarker, MapBounds } from '@/types/map'
 import type { ProjectStatus, InfrastructureType, InfrastructureStatus } from '@/types/enums'
 
 const route = useRoute()
+const { t } = useI18n()
 const mapContainer = ref<HTMLDivElement | null>(null)
 const sidebarOpen = ref(true)
 let map: L.Map | null = null
@@ -29,9 +31,9 @@ const bounds = ref<MapBounds | null>(null)
 const boundsJson = ref('')
 const debouncedBounds = useDebounce(ref(boundsJson.value), 500)
 
-const cities = ref<CityMarker[]>([])
-const projectMarkers = ref<ProjectMarker[]>([])
-const infraMarkers = ref<InfrastructureMarker[]>([])
+const cities = ref<CityMapMarker[]>([])
+const projectMarkers = ref<ProjectMapMarker[]>([])
+const infraMarkers = ref<InfrastructureMapMarker[]>([])
 const cityOptions = ref<{ value: number; label: string }[]>([])
 const statusOptions = computed(() => Object.entries(PROJECT_STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })))
 const infraTypeOptions = computed(() => Object.entries(INFRASTRUCTURE_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l })))
@@ -85,7 +87,7 @@ function renderCities() {
   if (!cityLayer.value || !map) return
   cities.value.forEach((c) => {
     const m = L.circleMarker([c.latitude, c.longitude], { radius: 10, fillColor: '#6366f1', color: '#4f46e5', weight: 2, fillOpacity: 0.8 })
-    m.bindPopup(`<div class="text-sm"><b>${c.name}</b><br>${c.region}<br>Населення: ${c.population?.toLocaleString()}<br><a href="/cities/${c.id}" class="text-indigo-600 font-medium">Детальніше →</a></div>`)
+    m.bindPopup(`<div class="text-sm"><b>${c.name}</b><br>${c.region}<br>${t('cities.population')}: ${c.population?.toLocaleString()}<br><a href="/cities/${c.id}" class="text-indigo-600 font-medium">${t('common.details')} →</a></div>`)
     cityLayerGroup?.addLayer(m)
   })
 }
@@ -96,7 +98,7 @@ function renderProjects() {
   projectMarkers.value.forEach((p) => {
     const color = PROJECT_COLORS[p.status] || '#94a3b8'
     const m = L.circleMarker([p.latitude, p.longitude], { radius: 7, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.9 })
-    m.bindPopup(`<div class="text-sm"><b>${p.name}</b><br>${p.architectFullName}<br>${formatCurrency(p.budget)}<br><a href="/projects/${p.id}" class="text-indigo-600 font-medium">Детальніше →</a></div>`)
+    m.bindPopup(`<div class="text-sm"><b>${p.name}</b><br>${p.architectFullName}<br>${formatCurrency(p.budget)}<br><a href="/projects/${p.id}" class="text-indigo-600 font-medium">${t('common.details')} →</a></div>`)
     projectLayerGroup?.addLayer(m)
   })
 }
@@ -107,7 +109,7 @@ function renderInfra() {
   infraMarkers.value.forEach((i) => {
     const color = INFRA_COLORS[i.type] || '#94a3b8'
     const m = L.circleMarker([i.latitude, i.longitude], { radius: 5, fillColor: color, color: '#fff', weight: 1.5, fillOpacity: 0.8 })
-    m.bindPopup(`<div class="text-sm"><b>${i.name}</b><br>${i.projectName}<br><a href="/infrastructures/${i.id}" class="text-indigo-600 font-medium">Детальніше →</a></div>`)
+    m.bindPopup(`<div class="text-sm"><b>${i.name}</b><br>${i.projectName}<br><a href="/infrastructures/${i.id}" class="text-indigo-600 font-medium">${t('common.details')} →</a></div>`)
     infraLayerGroup?.addLayer(m)
   })
 }
@@ -147,26 +149,26 @@ onBeforeUnmount(() => { if (map) { map.remove(); map = null } })
       <div v-if="sidebarOpen" class="absolute left-0 top-0 bottom-0 z-20 w-80 bg-white border-r border-slate-200 overflow-y-auto shadow-lg">
         <div class="p-4 border-b border-slate-100">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-slate-900">Карта</h2>
+            <h2 class="text-lg font-semibold text-slate-900">{{ t('map.title') }}</h2>
             <button @click="sidebarOpen = false" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">✕</button>
           </div>
           <!-- Layers -->
           <div class="space-y-2 mb-4">
-            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="cityLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-indigo-500 inline-block" /> Міста</span></label>
-            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="projectLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-blue-500 inline-block" /> Проєкти</span></label>
-            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="infraLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-teal-500 inline-block" /> Інфраструктура</span></label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="cityLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-indigo-500 inline-block" /> {{ t('header.cities') }}</span></label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="projectLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-blue-500 inline-block" /> {{ t('header.projects') }}</span></label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer"><input v-model="infraLayer" type="checkbox" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500" /><span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-full bg-teal-500 inline-block" /> {{ t('header.infrastructures') }}</span></label>
           </div>
         </div>
         <!-- Filters -->
         <div class="p-4 space-y-3">
-          <BaseSelect v-model="filterCity" :options="cityOptions" label="Місто" placeholder="Усі міста" />
-          <BaseSelect v-model="filterProjectStatus" :options="statusOptions" label="Статус проєкту" placeholder="Усі" />
-          <BaseSelect v-model="filterInfraType" :options="infraTypeOptions" label="Тип інфраструктури" placeholder="Усі" />
-          <BaseSelect v-model="filterInfraStatus" :options="infraStatusOptions" label="Статус інфра." placeholder="Усі" />
+          <BaseSelect v-model="filterCity" :options="cityOptions" :label="t('cities.cityName')" :placeholder="t('projects.allCities')" />
+          <BaseSelect v-model="filterProjectStatus" :options="statusOptions" :label="t('projects.form.status')" :placeholder="t('common.all')" />
+          <BaseSelect v-model="filterInfraType" :options="infraTypeOptions" :label="t('infrastructures.form.type')" :placeholder="t('common.all')" />
+          <BaseSelect v-model="filterInfraStatus" :options="infraStatusOptions" :label="t('infrastructures.form.status')" :placeholder="t('common.all')" />
         </div>
         <!-- Legend -->
         <div class="p-4 border-t border-slate-100">
-          <h3 class="text-xs font-semibold text-slate-500 uppercase mb-2">Легенда проєктів</h3>
+          <h3 class="text-xs font-semibold text-slate-500 uppercase mb-2">{{ t('map.projectsLegend') }}</h3>
           <div class="space-y-1">
             <div v-for="(color, status) in PROJECT_COLORS" :key="status" class="flex items-center gap-2 text-xs text-slate-600">
               <span class="h-2.5 w-2.5 rounded-full inline-block" :style="{ backgroundColor: color }" />
@@ -180,7 +182,7 @@ onBeforeUnmount(() => { if (map) { map.remove(); map = null } })
     <!-- Toggle sidebar -->
     <button v-if="!sidebarOpen" @click="sidebarOpen = true"
       class="absolute left-3 top-3 z-20 rounded-lg bg-white border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 shadow-md hover:bg-slate-50 transition-colors">
-      ☰ Фільтри
+      ☰ {{ t('common.filters') }}
     </button>
 
     <!-- Map -->

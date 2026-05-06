@@ -4,28 +4,42 @@ export interface User {
   id: number
   email: string
   role: Role
-  fullName: string
+  active: boolean
+  firstName: string | null
+  lastName: string | null
+  patronymic: string | null
   specialization: string | null
   experienceYears: number | null
-  avatarUrl: string | null
-  active: boolean
+  phoneNumber: string | null
+  bio: string | null
   createdAt: string
-  updatedAt: string
+  avatarUrl: string | null
 }
 
-export interface UserCreateRequest {
+export interface CreateUserRequest {
   email: string
   password: string
   role: Role
-  fullName: string
+  firstName?: string | null
+  lastName?: string | null
+  patronymic?: string | null
   specialization?: string | null
   experienceYears?: number | null
+  phoneNumber?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
 }
 
-export interface UserUpdateRequest {
-  email: string
-  role: Role
-  fullName: string
+export interface UpdateUserRequest {
+  email?: string
+  role?: Role
+  active?: boolean
+  firstName?: string | null
+  lastName?: string | null
+  patronymic?: string | null
   specialization?: string | null
   experienceYears?: number | null
+  phoneNumber?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
 }

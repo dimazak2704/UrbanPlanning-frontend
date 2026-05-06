@@ -3,35 +3,41 @@ import type { ProjectStatus } from './enums'
 export interface Project {
   id: number
   name: string
-  description: string
-  status: ProjectStatus
-  budget: number
-  startDate: string
-  endDate: string | null
-  imageUrl: string | null
-  cityId: number
-  cityName: string
   districtId: number
   districtName: string
+  cityId: number
+  cityName: string
   architectId: number
   architectFullName: string
+  status: ProjectStatus
+  startDate: string | null
+  endDate: string | null
+  budget: number | null
+  description: string | null
+  latitude: number | null
+  longitude: number | null
+  infrastructureCount: number
   createdAt: string
   updatedAt: string
+  imageUrl: string | null
 }
 
-export interface ProjectCreateRequest {
+export interface ProjectRequest {
   name: string
-  description: string
-  status: ProjectStatus
-  budget: number
-  startDate: string
-  endDate?: string | null
-  imageUrl?: string | null
-  cityId: number
   districtId: number
+  architectId?: number | null
+  status: ProjectStatus
+  startDate?: string | null
+  endDate?: string | null
+  budget?: number | null
+  description?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  imageUrl?: string | null
 }
 
-export type ProjectUpdateRequest = ProjectCreateRequest
+export type ProjectCreateRequest = ProjectRequest
+export type ProjectUpdateRequest = ProjectRequest
 
 export interface ProjectFilters {
   name?: string

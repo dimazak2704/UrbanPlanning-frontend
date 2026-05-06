@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BaseModal from './BaseModal.vue';
 import BaseButton from './BaseButton.vue';
+import { useI18n } from 'vue-i18n';
 import { ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 
 interface Props {
@@ -14,11 +15,13 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  confirmLabel: 'Підтвердити',
-  cancelLabel: 'Скасувати',
+  confirmLabel: '',
+  cancelLabel: '',
   variant: 'danger',
   loading: false,
 });
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
@@ -75,14 +78,14 @@ const confirm = () => {
     <template #footer>
       <div class="flex justify-end gap-3">
         <BaseButton variant="outline" @click="close" :disabled="loading">
-          {{ cancelLabel }}
+          {{ cancelLabel || t('common.cancel') }}
         </BaseButton>
         <BaseButton
           :variant="variant === 'danger' ? 'danger' : variant === 'warning' ? 'secondary' : 'primary'"
           :loading="loading"
           @click="confirm"
         >
-          {{ confirmLabel }}
+          {{ confirmLabel || t('common.confirm') }}
         </BaseButton>
       </div>
     </template>

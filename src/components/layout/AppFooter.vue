@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 </script>
 
 <template>
@@ -15,34 +17,34 @@ import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
             </span>
           </div>
           <p class="text-sm leading-relaxed">
-            Система управління містобудуванням.
+            {{ t('footer.description') }}
           </p>
         </div>
 
         <!-- Links -->
         <div>
           <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-300">
-            Посилання
+            {{ t('footer.links') }}
           </h3>
           <ul class="space-y-2.5">
             <li>
               <RouterLink to="/cities" class="text-sm hover:text-white transition-colors">
-                Міста
+                {{ t('header.cities') }}
               </RouterLink>
             </li>
             <li>
               <RouterLink to="/projects" class="text-sm hover:text-white transition-colors">
-                Проєкти
+                {{ t('header.projects') }}
               </RouterLink>
             </li>
             <li>
               <RouterLink to="/map" class="text-sm hover:text-white transition-colors">
-                Карта
+                {{ t('header.map') }}
               </RouterLink>
             </li>
             <li>
               <RouterLink to="/architects" class="text-sm hover:text-white transition-colors">
-                Архітектори
+                {{ t('header.architects') }}
               </RouterLink>
             </li>
           </ul>
@@ -51,12 +53,12 @@ import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
         <!-- Contacts -->
         <div>
           <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-300">
-            Контакти
+            {{ t('footer.contacts') }}
           </h3>
           <ul class="space-y-2.5 text-sm">
             <li>📧 admin@urbanplan.ua</li>
             <li>📞 +380 44 123 45 67</li>
-            <li>📍 Україна, Київ</li>
+            <li>📍 {{ t('footer.location') }}</li>
           </ul>
         </div>
       </div>

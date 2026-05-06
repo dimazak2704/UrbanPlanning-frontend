@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'update:page', value: number): void
@@ -65,7 +67,7 @@ function goToPage(page: number | '...') {
   >
     <!-- Info -->
     <div class="text-sm text-slate-500">
-      Показано {{ showingFrom }}–{{ showingTo }} з {{ totalElements }}
+      {{ t('common.showingFromTo', { from: showingFrom, to: showingTo, total: totalElements }) }}
     </div>
 
     <!-- Page buttons -->
@@ -106,7 +108,7 @@ function goToPage(page: number | '...') {
 
     <!-- Page size -->
     <div class="flex items-center gap-2 text-sm text-slate-500">
-      <span>По</span>
+      <span>{{ t('common.perPage') }}</span>
       <select
         :value="pageSize"
         class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
@@ -116,7 +118,7 @@ function goToPage(page: number | '...') {
           {{ opt }}
         </option>
       </select>
-      <span>на сторінці</span>
+      <span>{{ t('common.onPage') }}</span>
     </div>
   </div>
 </template>

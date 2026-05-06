@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { HomeIcon } from '@heroicons/vue/24/outline'
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -11,13 +14,13 @@ import { HomeIcon } from '@heroicons/vue/24/outline'
       </svg>
     </div>
     <h1 class="text-3xl font-bold text-slate-900 mb-3">404</h1>
-    <p class="text-lg text-slate-500 mb-8">Сторінку не знайдено</p>
+    <p class="text-lg text-slate-500 mb-8">{{ t('errors.pageNotFound') }}</p>
     <RouterLink
       to="/"
       class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700"
     >
       <HomeIcon class="h-4 w-4" />
-      На головну
+      {{ t('header.home') }}
     </RouterLink>
   </div>
 </template>

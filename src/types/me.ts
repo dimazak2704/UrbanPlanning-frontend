@@ -1,4 +1,4 @@
-import type { Role } from './enums'
+import type { Role, ProjectStatus } from './enums'
 
 export interface AuthUser {
   id: number
@@ -13,31 +13,42 @@ export interface AuthResponse {
   userId: number
 }
 
-export interface MyProfile {
+export interface Me {
   id: number
   email: string
   role: Role
-  fullName: string
+  active: boolean
+  firstName: string | null
+  lastName: string | null
+  patronymic: string | null
+  fullName: string | null
   specialization: string | null
   experienceYears: number | null
-  avatarUrl: string | null
+  phoneNumber: string | null
+  bio: string | null
   createdAt: string
+  avatarUrl: string | null
 }
 
-export interface MyProfileUpdateRequest {
-  fullName: string
+export interface UpdateMeRequest {
+  firstName?: string | null
+  lastName?: string | null
+  patronymic?: string | null
   specialization?: string | null
   experienceYears?: number | null
+  phoneNumber?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
 }
 
-export interface PasswordChangeRequest {
+export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
 }
 
-export interface MyStats {
+export interface MeStats {
   totalProjects: number
-  activeProjects: number
-  completedProjects: number
+  projectsByStatus: Record<ProjectStatus, number>
   totalBudget: number
+  totalInfrastructures: number
 }

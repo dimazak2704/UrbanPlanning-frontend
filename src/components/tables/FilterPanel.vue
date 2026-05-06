@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { FunnelIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 }>()
 
 const expanded = ref(true)
+const { t } = useI18n()
 
 function toggle() {
   expanded.value = !expanded.value
@@ -29,7 +31,7 @@ function toggle() {
         @click="toggle"
       >
         <FunnelIcon class="h-4 w-4 text-slate-400" />
-        Фільтри
+        {{ t('map.filters') }}
         <span
           v-if="hasActiveFilters"
           class="flex h-2 w-2 rounded-full bg-primary-500"
@@ -45,7 +47,7 @@ function toggle() {
         @click="emit('clear')"
       >
         <XMarkIcon class="h-3.5 w-3.5" />
-        Очистити
+        {{ t('forms.filterReset') }}
       </button>
     </div>
     <transition

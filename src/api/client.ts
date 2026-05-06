@@ -13,6 +13,11 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  // Send locale for backend i18n (AcceptHeaderLocaleResolver)
+  const locale = localStorage.getItem('locale') || 'uk'
+  config.headers['Accept-Language'] = locale
+
   return config
 })
 
@@ -26,7 +31,7 @@ apiClient.interceptors.response.use(
     }
 
     const serverMessage = (error.response?.data as ErrorResponse)?.message
-    const message = serverMessage || error.message || 'Невідома помилка'
+    const message = serverMessage || error.message || 'Unknown error'
     return Promise.reject(new Error(message))
   },
 )

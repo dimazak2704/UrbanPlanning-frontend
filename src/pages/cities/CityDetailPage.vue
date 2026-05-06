@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, RouterLink, useRouter } from 'vue-router'
 import {
   ChevronRightIcon,
@@ -40,6 +41,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const toast = useToastStore()
+const { t } = useI18n()
 
 const cityId = computed(() => Number(route.params.id))
 const loading = ref(true)
@@ -52,13 +54,13 @@ const projectsTotalElements = ref(0)
 const projectStatusFilter = ref<ProjectStatus | ''>('')
 const projectSearch = ref('')
 
-const statusOptions = [
-  { value: 'PLANNED', label: 'Запланований' },
-  { value: 'APPROVED', label: 'Затверджений' },
-  { value: 'UNDER_CONSTRUCTION', label: 'Будується' },
-  { value: 'COMPLETED', label: 'Завершений' },
-  { value: 'SUSPENDED', label: 'Призупинений' },
-]
+const statusOptions = computed(() => [
+  { value: 'PLANNED', label: t('enums.projectStatus.PLANNED') },
+  { value: 'APPROVED', label: t('enums.projectStatus.APPROVED') },
+  { value: 'UNDER_CONSTRUCTION', label: t('enums.projectStatus.UNDER_CONSTRUCTION') },
+  { value: 'COMPLETED', label: t('enums.projectStatus.COMPLETED') },
+  { value: 'SUSPENDED', label: t('enums.projectStatus.SUSPENDED') },
+])
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 let map: L.Map | null = null
@@ -69,7 +71,7 @@ async function fetchCity() {
     const { data } = await getCityById(cityId.value)
     city.value = data
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Помилка завантаження міста')
+    toast.error(err instanceof Error ? err.message : t('cities.loadError'))
     router.push('/cities')
   } finally {
     loading.value = false
@@ -142,9 +144,9 @@ onMounted(async () => {
       <!-- Breadcrumbs -->
       <div class="sticky top-16 z-40 -mx-4 px-4 py-3 bg-slate-50/90 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mb-6 border-b border-slate-200">
         <nav class="flex items-center gap-1.5 text-sm text-slate-500">
-          <RouterLink to="/" class="hover:text-slate-700 transition-colors">Головна</RouterLink>
+          <RouterLink to="/" class="hover:text-slate-700 transition-colors">{{ t('header.home') }}</RouterLink>
           <ChevronRightIcon class="h-3.5 w-3.5" />
-          <RouterLink to="/cities" class="hover:text-slate-700 transition-colors">Міста</RouterLink>
+          <RouterLink to="/cities" class="hover:text-slate-700 transition-colors">{{ t('header.cities') }}</RouterLink>
           <ChevronRightIcon class="h-3.5 w-3.5" />
           <span class="text-slate-900 font-medium">{{ city.name }}</span>
         </nav>
@@ -163,28 +165,28 @@ onMounted(async () => {
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <UsersIcon class="h-4 w-4" />
-            Населення
+            {{ t('cities.population') }}
           </div>
           <p class="text-2xl font-bold text-slate-900">{{ formatNumber(city.population) }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <ArrowsPointingOutIcon class="h-4 w-4" />
-            Площа
+            {{ t('cities.area') }}
           </div>
-          <p class="text-2xl font-bold text-slate-900">{{ formatNumber(city.area) }} км²</p>
+          <p class="text-2xl font-bold text-slate-900">{{ formatNumber(city.area) }} {{ t('common.km2') }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <BuildingLibraryIcon class="h-4 w-4" />
-            Районів
+            {{ t('cities.districts') }}
           </div>
           <p class="text-2xl font-bold text-slate-900">{{ districts.length }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <FolderIcon class="h-4 w-4" />
-            Проєктів
+            {{ t('cities.projectsCount') }}
           </div>
           <p class="text-2xl font-bold text-slate-900">{{ projectsTotalElements }}</p>
         </div>
@@ -192,16 +194,16 @@ onMounted(async () => {
 
       <!-- Map -->
       <div class="mb-10">
-        <h2 class="text-xl font-semibold text-slate-900 mb-4">Карта</h2>
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">{{ t('cities.map') }}</h2>
         <div ref="mapContainer" class="h-80 rounded-xl border border-slate-200 overflow-hidden z-0" />
       </div>
 
       <!-- Districts -->
       <div class="mb-10">
         <h2 class="text-xl font-semibold text-slate-900 mb-4">
-          Райони міста ({{ districts.length }})
+          {{ t('cities.cityDistricts', { count: districts.length }) }}
         </h2>
-        <div v-if="districts.length === 0" class="text-sm text-slate-500">Районів не знайдено</div>
+        <div v-if="districts.length === 0" class="text-sm text-slate-500">{{ t('cities.districtsNotFound') }}</div>
         <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <RouterLink
             v-for="d in districts"
@@ -219,7 +221,7 @@ onMounted(async () => {
             </div>
             <div class="grid grid-cols-2 gap-2 text-sm text-slate-500">
               <span>👥 {{ formatNumber(d.population) }}</span>
-              <span>📐 {{ formatNumber(d.area) }} км²</span>
+              <span>📐 {{ formatNumber(d.area) }} {{ t('common.km2') }}</span>
             </div>
           </RouterLink>
         </div>
@@ -229,31 +231,31 @@ onMounted(async () => {
       <div>
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 class="text-xl font-semibold text-slate-900">
-            Проєкти в місті ({{ projectsTotalElements }})
+            {{ t('cities.cityProjects', { count: projectsTotalElements }) }}
           </h2>
           <RouterLink
             :to="`/map?cityId=${city.id}`"
             class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
           >
             <MapPinIcon class="h-4 w-4" />
-            На карті
+            {{ t('common.moreOnMap') }}
           </RouterLink>
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row mb-6">
           <div class="sm:w-64">
-            <BaseInput v-model="projectSearch" placeholder="Пошук проєктів..." />
+            <BaseInput v-model="projectSearch" :placeholder="t('cities.searchProjects')" />
           </div>
           <div class="sm:w-48">
             <BaseSelect
               v-model="projectStatusFilter"
               :options="statusOptions"
-              placeholder="Усі статуси"
+              :placeholder="t('projects.allStatuses')"
             />
           </div>
         </div>
 
-        <EmptyState v-if="projects.length === 0 && !loading" title="Проєктів не знайдено" />
+        <EmptyState v-if="projects.length === 0 && !loading" :title="t('projects.notFound')" />
         <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
         </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -18,11 +19,11 @@ import { getCities } from '@/api/cities.api'
 import { usePagination } from '@/composables/usePagination'
 import { useDebounce } from '@/composables/useDebounce'
 import { useToastStore } from '@/stores/toast.store'
-import { DISTRICT_TYPE_LABELS } from '@/utils/enum-labels'
 import type { District, DistrictCreateRequest, DistrictFilters } from '@/types/district'
 import type { DistrictType } from '@/types/enums'
 
 const toast = useToastStore()
+const { t } = useI18n()
 const loading = ref(true)
 const districts = ref<District[]>([])
 
@@ -30,7 +31,12 @@ const filters = ref<DistrictFilters>({ name: '', cityId: undefined, type: undefi
 const { page, totalPages, totalElements, updatePage, setTotal } = usePagination(0)
 const debouncedFilters = useDebounce(filters.value, 500)
 
-const typeOptions = Object.entries(DISTRICT_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l }))
+const typeOptions = computed(() => [
+  { value: 'RESIDENTIAL', label: t('enums.districtType.RESIDENTIAL') },
+  { value: 'INDUSTRIAL', label: t('enums.districtType.INDUSTRIAL') },
+  { value: 'RECREATIONAL', label: t('enums.districtType.RECREATIONAL') },
+  { value: 'MIXED', label: t('enums.districtType.MIXED') },
+])
 const cityOptions = ref<{value: number, label: string}[]>([])
 
 async function fetchCities() {
@@ -49,7 +55,7 @@ async function fetchDistricts() {
     districts.value = data.content
     setTotal(data.totalElements, data.totalPages)
   } catch {
-    toast.error('Помилка завантаження районів')
+    toast.error(t('districts.loadError'))
   } finally {
     loading.value = false
   }
@@ -97,15 +103,15 @@ async function handleSave() {
   try {
     if (isEdit.value) {
       await updateDistrict(currentId.value, form.value)
-      toast.success('Район оновлено')
+      toast.success(t('districts.updateSuccess'))
     } else {
       await createDistrict(form.value)
-      toast.success('Район створено')
+      toast.success(t('districts.createSuccess'))
     }
     showModal.value = false
     fetchDistricts()
   } catch {
-    toast.error('Помилка збереження')
+    toast.error(t('districts.saveError'))
   } finally {
     saving.value = false
   }
@@ -117,11 +123,11 @@ async function confirmDelete() {
   if (!itemToDelete.value) return
   try {
     await deleteDistrict(itemToDelete.value.id)
-    toast.success('Район видалено')
+    toast.success(t('districts.deleteSuccess'))
     if (districts.value.length === 1 && page.value > 0) page.value--
     else fetchDistricts()
   } catch {
-    toast.error('Помилка видалення')
+    toast.error(t('districts.deleteError'))
   } finally {
     itemToDelete.value = null
   }
@@ -141,14 +147,14 @@ function getTypeColor(type: DistrictType) {
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-slate-900">Управління районами</h1>
-      <BaseButton @click="openCreate"><template #iconLeft><PlusIcon class="h-4 w-4" /></template>Додати район</BaseButton>
+      <h1 class="text-2xl font-bold text-slate-900">{{ t('admin.districtsManagement') }}</h1>
+      <BaseButton @click="openCreate"><template #iconLeft><PlusIcon class="h-4 w-4" /></template>{{ t('districts.addDistrict') }}</BaseButton>
     </div>
 
     <FilterPanel @reset="filters = { name: '', cityId: undefined, type: undefined }">
-      <BaseInput v-model="filters.name" placeholder="Пошук за назвою..." />
-      <BaseSelect v-model="filters.cityId" :options="cityOptions" placeholder="Всі міста" />
-      <BaseSelect v-model="filters.type" :options="typeOptions" placeholder="Всі типи" />
+      <BaseInput v-model="filters.name" :placeholder="t('cities.searchByName')" />
+      <BaseSelect v-model="filters.cityId" :options="cityOptions" :placeholder="t('projects.allCities')" />
+      <BaseSelect v-model="filters.type" :options="typeOptions" :placeholder="t('common.all')" />
     </FilterPanel>
 
     <div class="card p-0 overflow-hidden">
@@ -157,11 +163,11 @@ function getTypeColor(type: DistrictType) {
           <thead class="bg-slate-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Назва</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Місто</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Тип</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Населення</th>
-              <th scope="col" class="relative px-6 py-3"><span class="sr-only">Дії</span></th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('districts.districtName') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.cityName') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('districts.type') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.population') }}</th>
+              <th scope="col" class="relative px-6 py-3"><span class="sr-only">{{ t('common.actions') }}</span></th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-slate-200">
@@ -170,7 +176,7 @@ function getTypeColor(type: DistrictType) {
             </tr>
             <tr v-else-if="districts.length === 0">
               <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                <EmptyState title="Не знайдено" description="Спробуйте змінити фільтри пошуку." />
+                <EmptyState :title="t('cities.notFound')" :description="t('cities.notFoundDescription')" />
               </td>
             </tr>
             <tr v-else v-for="district in districts" :key="district.id" class="hover:bg-slate-50">
@@ -178,7 +184,7 @@ function getTypeColor(type: DistrictType) {
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{{ district.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ district.cityName }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <BaseBadge :variant="getTypeColor(district.type)">{{ DISTRICT_TYPE_LABELS[district.type] }}</BaseBadge>
+                <BaseBadge :variant="getTypeColor(district.type)">{{ t(`enums.districtType.${district.type}`) }}</BaseBadge>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ district.population }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -198,34 +204,34 @@ function getTypeColor(type: DistrictType) {
       </div>
     </div>
 
-    <BaseModal v-model="showModal" :title="isEdit ? 'Редагувати район' : 'Новий район'" size="lg">
+    <BaseModal v-model="showModal" :title="isEdit ? t('districts.editDistrict') : t('districts.addDistrict')" size="lg">
       <form @submit.prevent="handleSave" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseInput v-model="form.name" label="Назва *" required />
-          <BaseSelect v-model="form.cityId" :options="cityOptions" label="Місто *" required />
+          <BaseInput v-model="form.name" :label="t('districts.districtName') + ' *'" required />
+          <BaseSelect v-model="form.cityId" :options="cityOptions" :label="t('cities.cityName') + ' *'" required />
         </div>
         <div class="grid grid-cols-1 gap-4">
-          <BaseSelect v-model="form.type" :options="typeOptions" label="Тип *" required />
+          <BaseSelect v-model="form.type" :options="typeOptions" :label="t('districts.type') + ' *'" required />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseInput v-model="form.population" type="number" label="Населення" />
-          <BaseInput v-model="form.area" type="number" label="Площа (кв.км)" />
+          <BaseInput v-model="form.population" type="number" :label="t('cities.population')" />
+          <BaseInput v-model="form.area" type="number" :label="t('cities.area')" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Локація на карті</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('cities.map') }}</label>
           <LocationPicker v-model="location" />
         </div>
         <div class="flex justify-end gap-3 pt-4">
-          <BaseButton type="button" variant="secondary" @click="showModal = false">Скасувати</BaseButton>
-          <BaseButton type="submit" :loading="saving">Зберегти</BaseButton>
+          <BaseButton type="button" variant="secondary" @click="showModal = false">{{ t('common.cancel') }}</BaseButton>
+          <BaseButton type="submit" :loading="saving">{{ t('common.save') }}</BaseButton>
         </div>
       </form>
     </BaseModal>
 
     <ConfirmDialog
       v-model="itemToDelete !== null"
-      title="Видалити район?"
-      :message="`Ви впевнені, що хочете видалити район ${itemToDelete?.name}?`"
+      :title="t('districts.deleteConfirmTitle')"
+      :message="t('districts.deleteConfirmDesc')"
       @confirm="confirmDelete"
       @cancel="itemToDelete = null"
     />

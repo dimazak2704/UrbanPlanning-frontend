@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type {
   ProjectStatus,
   InfrastructureType,
@@ -6,58 +7,46 @@ import type {
   Role,
 } from '@/types/enums'
 
-export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
-  PLANNED: 'Запланований',
-  APPROVED: 'Затверджений',
-  UNDER_CONSTRUCTION: 'Будується',
-  COMPLETED: 'Завершений',
-  SUSPENDED: 'Призупинений',
-}
+const t = (key: string) => i18n.global.t(key)
 
-export const INFRASTRUCTURE_TYPE_LABELS: Record<InfrastructureType, string> = {
-  TRANSPORT: 'Транспорт',
-  SOCIAL: 'Соціальна',
-  UTILITY: 'Комунальна',
-  RECREATIONAL: 'Рекреаційна',
-  OTHER: 'Інше',
-}
+export const PROJECT_STATUS_LABELS = new Proxy({} as Record<ProjectStatus, string>, {
+  get: (_, key: string) => t(`enums.projectStatus.${key}`),
+})
 
-export const INFRASTRUCTURE_STATUS_LABELS: Record<InfrastructureStatus, string> = {
-  PLANNED: 'Запланована',
-  UNDER_CONSTRUCTION: 'Будується',
-  OPERATIONAL: 'Діє',
-}
+export const INFRASTRUCTURE_TYPE_LABELS = new Proxy({} as Record<InfrastructureType, string>, {
+  get: (_, key: string) => t(`enums.infrastructureType.${key}`),
+})
 
-export const DISTRICT_TYPE_LABELS: Record<DistrictType, string> = {
-  RESIDENTIAL: 'Житловий',
-  INDUSTRIAL: 'Промисловий',
-  RECREATIONAL: 'Рекреаційний',
-  MIXED: 'Змішаний',
-}
+export const INFRASTRUCTURE_STATUS_LABELS = new Proxy({} as Record<InfrastructureStatus, string>, {
+  get: (_, key: string) => t(`enums.infrastructureStatus.${key}`),
+})
 
-export const ROLE_LABELS: Record<Role, string> = {
-  ADMIN: 'Адміністратор',
-  ARCHITECT: 'Архітектор',
-}
+export const DISTRICT_TYPE_LABELS = new Proxy({} as Record<DistrictType, string>, {
+  get: (_, key: string) => t(`enums.districtType.${key}`),
+})
+
+export const ROLE_LABELS = new Proxy({} as Record<Role, string>, {
+  get: (_, key: string) => t(`enums.role.${key}`),
+})
 
 export function getProjectStatusLabel(status: ProjectStatus): string {
-  return PROJECT_STATUS_LABELS[status] ?? status
+  return t(`enums.projectStatus.${status}`)
 }
 
 export function getInfrastructureTypeLabel(type: InfrastructureType): string {
-  return INFRASTRUCTURE_TYPE_LABELS[type] ?? type
+  return t(`enums.infrastructureType.${type}`)
 }
 
 export function getInfrastructureStatusLabel(status: InfrastructureStatus): string {
-  return INFRASTRUCTURE_STATUS_LABELS[status] ?? status
+  return t(`enums.infrastructureStatus.${status}`)
 }
 
 export function getDistrictTypeLabel(type: DistrictType): string {
-  return DISTRICT_TYPE_LABELS[type] ?? type
+  return t(`enums.districtType.${type}`)
 }
 
 export function getRoleLabel(role: Role): string {
-  return ROLE_LABELS[role] ?? role
+  return t(`enums.role.${role}`)
 }
 
 const PROJECT_STATUS_COLORS: Record<ProjectStatus, string> = {

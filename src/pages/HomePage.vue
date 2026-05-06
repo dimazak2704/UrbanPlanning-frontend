@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import {
   MapIcon,
@@ -22,19 +23,35 @@ import SkeletonCard from '@/components/common/SkeletonCard.vue'
 
 import { getOverview, getProjectsByStatus, getProjectsByCity, getInfrastructuresByType, getTopArchitects, getProjectsTimeline } from '@/api/analytics.api'
 import { getProjects } from '@/api/projects.api'
-import { formatCurrency, formatNumber } from '@/utils/format'
-
-import type { OverviewStats, ChartDataItem, TopArchitect, TimelinePoint } from '@/types/analytics'
+import { formatCurrency, formatNumber, formatCompactCurrency } from '@/utils/format'
+import type { OverviewStats, CountByEnum, CityProjectsStats, TopArchitect, TimelinePoint } from '@/types/analytics'
 import type { Project } from '@/types/project'
+import type { ProjectStatus, InfrastructureType } from '@/types/enums'
 
 const loading = ref(true)
 const overview = ref<OverviewStats | null>(null)
-const projectsByStatus = ref<ChartDataItem[]>([])
-const projectsByCity = ref<ChartDataItem[]>([])
-const infraByType = ref<ChartDataItem[]>([])
+const projectsByStatusRaw = ref<CountByEnum[]>([])
+const projectsByCityRaw = ref<CityProjectsStats[]>([])
+const infraByTypeRaw = ref<CountByEnum[]>([])
 const topArchitects = ref<TopArchitect[]>([])
-const timeline = ref<TimelinePoint[]>([])
+const timelineRaw = ref<TimelinePoint[]>([])
 const recentProjects = ref<Project[]>([])
+
+const { t } = useI18n()
+
+// Mapped chart data
+const projectsByStatus = computed(() =>
+  projectsByStatusRaw.value.map(d => ({ label: t(`enums.projectStatus.${d.label}`), value: d.count }))
+)
+const projectsByCity = computed(() =>
+  projectsByCityRaw.value.map(d => ({ label: d.cityName, value: d.projectsCount }))
+)
+const infraByType = computed(() =>
+  infraByTypeRaw.value.map(d => ({ label: t(`enums.infrastructureType.${d.label}`), value: d.count }))
+)
+const timelineChartData = computed(() =>
+  timelineRaw.value.map(d => ({ x: d.period, y: d.count }))
+)
 
 onMounted(async () => {
   try {
@@ -49,23 +66,16 @@ onMounted(async () => {
     ])
 
     if (ovRes.status === 'fulfilled') overview.value = ovRes.value.data
-    if (statusRes.status === 'fulfilled') projectsByStatus.value = statusRes.value.data
-    if (cityRes.status === 'fulfilled') projectsByCity.value = cityRes.value.data
-    if (infraRes.status === 'fulfilled') infraByType.value = infraRes.value.data
+    if (statusRes.status === 'fulfilled') projectsByStatusRaw.value = statusRes.value.data
+    if (cityRes.status === 'fulfilled') projectsByCityRaw.value = cityRes.value.data
+    if (infraRes.status === 'fulfilled') infraByTypeRaw.value = infraRes.value.data
     if (archRes.status === 'fulfilled') topArchitects.value = archRes.value.data
-    if (timeRes.status === 'fulfilled') timeline.value = timeRes.value.data
+    if (timeRes.status === 'fulfilled') timelineRaw.value = timeRes.value.data
     if (projRes.status === 'fulfilled') recentProjects.value = projRes.value.data.content
   } finally {
     loading.value = false
   }
 })
-
-const timelineChartData = ref<{ x: string; y: number }[]>([])
-
-import { watch } from 'vue'
-watch(timeline, (val) => {
-  timelineChartData.value = val.map((p) => ({ x: p.date, y: p.count }))
-}, { immediate: true })
 </script>
 
 <template>
@@ -86,14 +96,13 @@ watch(timeline, (val) => {
           </div>
 
           <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Urban
-            <span class="bg-gradient-to-r from-accent-400 to-accent-300 bg-clip-text text-transparent">Planning</span>
-            Platform
+            {{ t('home.heroTitle1') }}
+            <span class="bg-gradient-to-r from-accent-400 to-accent-300 bg-clip-text text-transparent">{{ t('home.heroTitle2') }}</span>
+            {{ t('home.heroTitle3') }}
           </h1>
 
           <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-            Сучасна платформа для управління містобудівними проєктами України —
-            моніторинг, аналітика, карти та портфоліо архітекторів
+            {{ t('home.heroDescription') }}
           </p>
 
           <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -102,7 +111,7 @@ watch(timeline, (val) => {
               class="group inline-flex items-center gap-2.5 rounded-xl bg-accent-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent-500/30 transition-all hover:bg-accent-600 hover:shadow-xl"
             >
               <MapIcon class="h-5 w-5" />
-              Дивитись карту
+              {{ t('home.viewMap') }}
               <ArrowRightIcon class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </RouterLink>
             <RouterLink
@@ -110,7 +119,7 @@ watch(timeline, (val) => {
               class="inline-flex items-center gap-2.5 rounded-xl border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
             >
               <DocumentTextIcon class="h-5 w-5" />
-              Переглянути проєкти
+              {{ t('home.browseProjects') }}
             </RouterLink>
           </div>
         </div>
@@ -127,27 +136,27 @@ watch(timeline, (val) => {
       </div>
       <div v-else-if="overview" class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
-          :icon="BuildingOffice2Icon" label="Міста" :value="formatNumber(overview.totalCities)"
+          :icon="BuildingOffice2Icon" :label="t('home.kpiCities')" :value="formatNumber(overview.totalCities)"
           color-class="bg-primary-50 text-primary-600" to="/cities"
         />
         <StatCard
-          :icon="BuildingLibraryIcon" label="Райони" :value="formatNumber(overview.totalDistricts)"
+          :icon="BuildingLibraryIcon" :label="t('home.kpiDistricts')" :value="formatNumber(overview.totalDistricts)"
           color-class="bg-blue-50 text-blue-600"
         />
         <StatCard
-          :icon="DocumentTextIcon" label="Проєкти" :value="formatNumber(overview.totalProjects)"
+          :icon="DocumentTextIcon" :label="t('home.kpiProjects')" :value="formatNumber(overview.totalProjects)"
           color-class="bg-accent-50 text-accent-600" to="/projects"
         />
         <StatCard
-          :icon="WrenchScrewdriverIcon" label="Інфраструктура" :value="formatNumber(overview.totalInfrastructures)"
+          :icon="WrenchScrewdriverIcon" :label="t('home.kpiInfrastructures')" :value="formatNumber(overview.totalInfrastructures)"
           color-class="bg-amber-50 text-amber-600" to="/infrastructures"
         />
         <StatCard
-          :icon="UserGroupIcon" label="Архітектори" :value="formatNumber(overview.totalArchitects)"
+          :icon="UserGroupIcon" :label="t('home.kpiArchitects')" :value="formatNumber(overview.totalArchitects)"
           color-class="bg-emerald-50 text-emerald-600" to="/architects"
         />
         <StatCard
-          :icon="CurrencyDollarIcon" label="Загальний бюджет" :value="formatCurrency(overview.totalBudget)"
+          :icon="CurrencyDollarIcon" :label="t('home.kpiBudget')" :value="formatCompactCurrency(overview.totalProjectsBudget)"
           color-class="bg-violet-50 text-violet-600"
         />
       </div>
@@ -155,7 +164,7 @@ watch(timeline, (val) => {
 
     <!-- Charts -->
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-      <h2 class="mb-8 text-2xl font-bold text-slate-900">Аналітика</h2>
+      <h2 class="mb-8 text-2xl font-bold text-slate-900">{{ t('home.analytics') }}</h2>
       <div v-if="loading" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div v-for="i in 4" :key="i" class="animate-pulse rounded-xl border border-slate-200 bg-white p-5">
           <div class="h-5 w-40 rounded bg-slate-200 mb-4" />
@@ -163,10 +172,10 @@ watch(timeline, (val) => {
         </div>
       </div>
       <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <PieChart :data="projectsByStatus" title="Проєкти за статусом" />
-        <BarChart :data="projectsByCity" title="Топ міст за кількістю проєктів" />
-        <PieChart :data="infraByType" title="Інфраструктура за типом" />
-        <LineChart :data="timelineChartData" title="Динаміка запуску проєктів" />
+        <PieChart :data="projectsByStatus" :title="t('home.projectsByStatus')" />
+        <BarChart :data="projectsByCity" :title="t('home.topCitiesByProjects')" />
+        <PieChart :data="infraByType" :title="t('home.infraByType')" />
+        <LineChart :data="timelineChartData" :title="t('home.projectsTimeline')" />
       </div>
     </section>
 
@@ -174,16 +183,31 @@ watch(timeline, (val) => {
     <section v-if="topArchitects.length > 0" class="bg-white py-16">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold text-slate-900">Топ архітекторів</h2>
+          <h2 class="text-2xl font-bold text-slate-900">{{ t('home.topArchitects') }}</h2>
           <RouterLink to="/architects" class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors flex items-center gap-1">
-            Всі архітектори <ArrowRightIcon class="h-4 w-4" />
+            {{ t('home.allArchitects') }} <ArrowRightIcon class="h-4 w-4" />
           </RouterLink>
         </div>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <ArchitectCard
             v-for="arch in topArchitects"
-            :key="arch.id"
-            :architect="{ id: arch.id, fullName: arch.fullName, email: '', specialization: '', experienceYears: 0, avatarUrl: null, projectsCount: arch.projectsCount, createdAt: '' }"
+            :key="arch.architectId"
+            :architect="{
+              id: arch.architectId,
+              firstName: '',
+              lastName: '',
+              patronymic: null,
+              fullName: arch.fullName,
+              email: '',
+              specialization: arch.specialization,
+              experienceYears: null,
+              phoneNumber: null,
+              bio: null,
+              active: true,
+              avatarUrl: arch.avatarUrl ?? null,
+              projectsCount: arch.projectsCount,
+              createdAt: ''
+            }"
           />
         </div>
       </div>
@@ -193,9 +217,9 @@ watch(timeline, (val) => {
     <section v-if="recentProjects.length > 0" class="py-16">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold text-slate-900">Актуальні проєкти</h2>
+          <h2 class="text-2xl font-bold text-slate-900">{{ t('home.recentProjects') }}</h2>
           <RouterLink to="/projects" class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors flex items-center gap-1">
-            Всі проєкти <ArrowRightIcon class="h-4 w-4" />
+            {{ t('home.allProjects') }} <ArrowRightIcon class="h-4 w-4" />
           </RouterLink>
         </div>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -207,16 +231,16 @@ watch(timeline, (val) => {
     <!-- CTA -->
     <section class="bg-gradient-to-r from-primary-900 to-primary-800 py-16">
       <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-white mb-4">Досліджуйте всі можливості платформи</h2>
+        <h2 class="text-3xl font-bold text-white mb-4">{{ t('home.ctaTitle') }}</h2>
         <p class="text-lg text-primary-200 mb-8 max-w-2xl mx-auto">
-          Перегляньте інтерактивну карту з усіма проєктами та інфраструктурою міст України
+          {{ t('home.ctaDescription') }}
         </p>
         <RouterLink
           to="/map"
           class="inline-flex items-center gap-2.5 rounded-xl bg-accent-500 px-8 py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-accent-600"
         >
           <MapIcon class="h-5 w-5" />
-          Відкрити карту
+          {{ t('home.openMap') }}
           <ArrowRightIcon class="h-4 w-4" />
         </RouterLink>
       </div>

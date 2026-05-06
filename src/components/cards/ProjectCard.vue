@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import type { Project } from '@/types/project'
 import BaseBadge from '@/components/common/BaseBadge.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
-import { getProjectStatusLabel, getProjectStatusColor } from '@/utils/enum-labels'
+import { getProjectStatusColor } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
 import { MapPinIcon, UserIcon, ArrowRightIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
@@ -18,6 +19,8 @@ const emit = defineEmits<{
   (e: 'edit', project: Project): void
   (e: 'delete', project: Project): void
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -46,7 +49,7 @@ const emit = defineEmits<{
           {{ project.name }}
         </h3>
         <BaseBadge :custom-class="getProjectStatusColor(project.status)">
-          {{ getProjectStatusLabel(project.status) }}
+          {{ t(`enums.projectStatus.${project.status}`) }}
         </BaseBadge>
       </div>
 
@@ -66,7 +69,7 @@ const emit = defineEmits<{
           {{ formatCurrency(project.budget) }}
         </span>
         <span class="flex items-center gap-1 text-xs font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
-          Детальніше
+          {{ t('common.details') }}
           <ArrowRightIcon class="h-3.5 w-3.5" />
         </span>
       </div>

@@ -4,22 +4,32 @@ export interface OverviewStats {
   totalProjects: number
   totalInfrastructures: number
   totalArchitects: number
-  totalBudget: number
+  totalProjectsBudget: number
+  totalCitiesBudget: number
 }
 
-export interface ChartDataItem {
+export interface CountByEnum {
   label: string
-  value: number
+  count: number
 }
 
-export interface TopArchitect {
-  id: number
-  fullName: string
+export interface CityProjectsStats {
+  cityId: number
+  cityName: string
   projectsCount: number
   totalBudget: number
 }
 
+export interface TopArchitect {
+  architectId: number
+  fullName: string
+  specialization: string | null
+  projectsCount: number
+  totalBudget: number
+  avatarUrl: string | null
+}
+
 export interface TimelinePoint {
-  date: string
+  period: string
   count: number
 }

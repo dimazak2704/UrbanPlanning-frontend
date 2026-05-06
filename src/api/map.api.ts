@@ -1,22 +1,22 @@
 import apiClient from './client'
 import type {
-  CityMarker,
-  DistrictMarker,
-  ProjectMarker,
-  InfrastructureMarker,
+  CityMapMarker,
+  DistrictMapMarker,
+  ProjectMapMarker,
+  InfrastructureMapMarker,
   MapBounds,
   MapProjectFilters,
   MapInfrastructureFilters,
 } from '@/types/map'
 
 export function getMapCities() {
-  return apiClient.get<CityMarker[]>('/map/cities')
+  return apiClient.get<CityMapMarker[]>('/map/cities')
 }
 
 export function getMapDistricts(cityId?: number) {
   const params: Record<string, string> = {}
   if (cityId !== undefined) params.cityId = String(cityId)
-  return apiClient.get<DistrictMarker[]>('/map/districts', { params })
+  return apiClient.get<DistrictMapMarker[]>('/map/districts', { params })
 }
 
 export function getMapProjects(filters?: MapProjectFilters, bounds?: MapBounds) {
@@ -31,7 +31,7 @@ export function getMapProjects(filters?: MapProjectFilters, bounds?: MapBounds) 
     params.neLat = String(bounds.neLat)
     params.neLng = String(bounds.neLng)
   }
-  return apiClient.get<ProjectMarker[]>('/map/projects', { params })
+  return apiClient.get<ProjectMapMarker[]>('/map/projects', { params })
 }
 
 export function getMapInfrastructures(filters?: MapInfrastructureFilters, bounds?: MapBounds) {
@@ -46,5 +46,5 @@ export function getMapInfrastructures(filters?: MapInfrastructureFilters, bounds
     params.neLat = String(bounds.neLat)
     params.neLng = String(bounds.neLng)
   }
-  return apiClient.get<InfrastructureMarker[]>('/map/infrastructures', { params })
+  return apiClient.get<InfrastructureMapMarker[]>('/map/infrastructures', { params })
 }

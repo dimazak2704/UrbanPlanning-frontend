@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, RouterLink, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ChevronRightIcon, BriefcaseIcon, EnvelopeIcon, CalendarIcon } from '@heroicons/vue/24/outline'
 import AvatarImg from '@/components/common/AvatarImg.vue'
 import ProjectCard from '@/components/cards/ProjectCard.vue'
@@ -17,6 +18,7 @@ import type { Project } from '@/types/project'
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const { t } = useI18n()
 const archId = computed(() => Number(route.params.id))
 const loading = ref(true)
 const architect = ref<Architect | null>(null)
@@ -28,7 +30,7 @@ const projTotalElements = ref(0)
 async function fetchArchitect() {
   loading.value = true
   try { const { data } = await getArchitectById(archId.value); architect.value = data }
-  catch (err) { toast.error(err instanceof Error ? err.message : 'Помилка'); router.push('/architects') }
+  catch (err) { toast.error(err instanceof Error ? err.message : t('architects.loadError')); router.push('/architects') }
   finally { loading.value = false }
 }
 
@@ -39,7 +41,6 @@ async function fetchProjects() {
   } catch { /* ignore */ }
 }
 
-import { watch } from 'vue'
 watch(() => projPage.value, fetchProjects)
 onMounted(async () => { await fetchArchitect(); fetchProjects() })
 </script>
@@ -50,9 +51,9 @@ onMounted(async () => { await fetchArchitect(); fetchProjects() })
     <template v-else-if="architect">
       <div class="sticky top-16 z-40 -mx-4 px-4 py-3 bg-slate-50/90 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mb-6 border-b border-slate-200">
         <nav class="flex items-center gap-1.5 text-sm text-slate-500 flex-wrap">
-          <RouterLink to="/" class="hover:text-slate-700">Головна</RouterLink>
+          <RouterLink to="/" class="hover:text-slate-700">{{ t('header.home') }}</RouterLink>
           <ChevronRightIcon class="h-3.5 w-3.5" />
-          <RouterLink to="/architects" class="hover:text-slate-700">Архітектори</RouterLink>
+          <RouterLink to="/architects" class="hover:text-slate-700">{{ t('header.architects') }}</RouterLink>
           <ChevronRightIcon class="h-3.5 w-3.5" />
           <span class="text-slate-900 font-medium">{{ architect.fullName }}</span>
         </nav>
@@ -67,27 +68,27 @@ onMounted(async () => { await fetchArchitect(); fetchProjects() })
             <p class="mt-1 text-lg text-slate-500">{{ architect.specialization }}</p>
             <div class="mt-4 flex flex-wrap gap-4 justify-center sm:justify-start">
               <div class="flex items-center gap-2 text-sm text-slate-600">
-                <BriefcaseIcon class="h-4 w-4 text-slate-400" /> {{ architect.experienceYears }} років досвіду
+                <BriefcaseIcon class="h-4 w-4 text-slate-400" /> {{ architect.experienceYears }} {{ t('common.years') }}
               </div>
               <div class="flex items-center gap-2 text-sm text-slate-600">
                 <EnvelopeIcon class="h-4 w-4 text-slate-400" /> {{ architect.email }}
               </div>
               <div class="flex items-center gap-2 text-sm text-slate-600">
-                <CalendarIcon class="h-4 w-4 text-slate-400" /> З {{ formatDate(architect.createdAt) }}
+                <CalendarIcon class="h-4 w-4 text-slate-400" /> {{ t('common.from') }} {{ formatDate(architect.createdAt) }}
               </div>
             </div>
           </div>
           <div class="text-center">
             <p class="text-3xl font-bold text-primary-600">{{ architect.projectsCount }}</p>
-            <p class="text-sm text-slate-500">проєктів</p>
+            <p class="text-sm text-slate-500">{{ t('architects.projectsCount') }}</p>
           </div>
         </div>
       </div>
 
       <!-- Projects -->
       <div>
-        <h2 class="text-xl font-semibold text-slate-900 mb-4">Проєкти ({{ projTotalElements }})</h2>
-        <EmptyState v-if="projects.length === 0" title="Проєктів не знайдено" />
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">{{ t('architects.projects', { count: projTotalElements }) }}</h2>
+        <EmptyState v-if="projects.length === 0" :title="t('projects.notFound')" />
         <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
         </div>

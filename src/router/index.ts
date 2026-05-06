@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import type { Role } from '@/types/enums'
 import { useAuthStore } from '@/stores/auth.store'
+import i18n from '@/i18n'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -17,13 +18,13 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: () => import('@/pages/HomePage.vue'),
-    meta: { title: 'Головна' },
+    meta: { title: 'titles.home' },
   },
   {
     path: '/login',
     name: 'login',
     component: () => import('@/pages/LoginPage.vue'),
-    meta: { layout: 'auth', title: 'Вхід' },
+    meta: { layout: 'auth', title: 'titles.login' },
   },
 
   // Cities
@@ -31,13 +32,13 @@ const routes: RouteRecordRaw[] = [
     path: '/cities',
     name: 'cities',
     component: () => import('@/pages/cities/CitiesListPage.vue'),
-    meta: { title: 'Міста' },
+    meta: { title: 'titles.cities' },
   },
   {
     path: '/cities/:id',
     name: 'city-detail',
     component: () => import('@/pages/cities/CityDetailPage.vue'),
-    meta: { title: 'Місто' },
+    meta: { title: 'titles.city' },
   },
 
   // Districts
@@ -45,7 +46,7 @@ const routes: RouteRecordRaw[] = [
     path: '/districts/:id',
     name: 'district-detail',
     component: () => import('@/pages/districts/DistrictDetailPage.vue'),
-    meta: { title: 'Район' },
+    meta: { title: 'titles.district' },
   },
 
   // Projects
@@ -53,25 +54,25 @@ const routes: RouteRecordRaw[] = [
     path: '/projects',
     name: 'projects',
     component: () => import('@/pages/projects/ProjectsListPage.vue'),
-    meta: { title: 'Проєкти' },
+    meta: { title: 'titles.projects' },
   },
   {
     path: '/projects/new',
     name: 'project-create',
     component: () => import('@/pages/projects/ProjectEditPage.vue'),
-    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Новий проєкт' },
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'titles.projectCreate' },
   },
   {
     path: '/projects/:id/edit',
     name: 'project-edit',
     component: () => import('@/pages/projects/ProjectEditPage.vue'),
-    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Редагування проєкту' },
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'titles.projectEdit' },
   },
   {
     path: '/projects/:id',
     name: 'project-detail',
     component: () => import('@/pages/projects/ProjectDetailPage.vue'),
-    meta: { title: 'Проєкт' },
+    meta: { title: 'titles.project' },
   },
 
   // Infrastructures
@@ -79,25 +80,25 @@ const routes: RouteRecordRaw[] = [
     path: '/infrastructures',
     name: 'infrastructures',
     component: () => import('@/pages/infrastructures/InfrastructuresListPage.vue'),
-    meta: { title: 'Інфраструктура' },
+    meta: { title: 'titles.infrastructures' },
   },
   {
     path: '/infrastructures/new',
     name: 'infrastructure-create',
     component: () => import('@/pages/infrastructures/InfrastructureEditPage.vue'),
-    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Нова інфраструктура' },
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'titles.infraCreate' },
   },
   {
     path: '/infrastructures/:id/edit',
     name: 'infrastructure-edit',
     component: () => import('@/pages/infrastructures/InfrastructureEditPage.vue'),
-    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'Редагування інфраструктури' },
+    meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'titles.infraEdit' },
   },
   {
     path: '/infrastructures/:id',
     name: 'infrastructure-detail',
     component: () => import('@/pages/infrastructures/InfrastructureDetailPage.vue'),
-    meta: { title: 'Інфраструктура' },
+    meta: { title: 'titles.infrastructure' },
   },
 
   // Architects
@@ -105,13 +106,13 @@ const routes: RouteRecordRaw[] = [
     path: '/architects',
     name: 'architects',
     component: () => import('@/pages/architects/ArchitectsListPage.vue'),
-    meta: { title: 'Архітектори' },
+    meta: { title: 'titles.architects' },
   },
   {
     path: '/architects/:id',
     name: 'architect-detail',
     component: () => import('@/pages/architects/ArchitectDetailPage.vue'),
-    meta: { title: 'Архітектор' },
+    meta: { title: 'titles.architect' },
   },
 
   // Map
@@ -119,7 +120,7 @@ const routes: RouteRecordRaw[] = [
     path: '/map',
     name: 'map',
     component: () => import('@/pages/map/MapPage.vue'),
-    meta: { title: 'Карта' },
+    meta: { title: 'titles.map' },
   },
 
   // Cabinet (me)
@@ -127,19 +128,19 @@ const routes: RouteRecordRaw[] = [
     path: '/me',
     name: 'my-dashboard',
     component: () => import('@/pages/me/MyDashboardPage.vue'),
-    meta: { requiresAuth: true, layout: 'cabinet', title: 'Мій кабінет' },
+    meta: { requiresAuth: true, layout: 'cabinet', title: 'titles.meDashboard' },
   },
   {
     path: '/me/projects',
     name: 'my-projects',
     component: () => import('@/pages/me/MyProjectsPage.vue'),
-    meta: { requiresAuth: true, layout: 'cabinet', title: 'Мої проєкти' },
+    meta: { requiresAuth: true, requiresRole: 'ARCHITECT', layout: 'cabinet', title: 'titles.meProjects' },
   },
   {
     path: '/me/profile',
     name: 'my-profile',
     component: () => import('@/pages/me/MyProfilePage.vue'),
-    meta: { requiresAuth: true, layout: 'cabinet', title: 'Мій профіль' },
+    meta: { requiresAuth: true, layout: 'cabinet', title: 'titles.meProfile' },
   },
 
   // Admin
@@ -147,19 +148,19 @@ const routes: RouteRecordRaw[] = [
     path: '/admin/users',
     name: 'admin-users',
     component: () => import('@/pages/admin/AdminUsersPage.vue'),
-    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'Користувачі' },
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'titles.adminUsers' },
   },
   {
     path: '/admin/cities',
     name: 'admin-cities',
     component: () => import('@/pages/admin/AdminCitiesPage.vue'),
-    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'Управління містами' },
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'titles.adminCities' },
   },
   {
     path: '/admin/districts',
     name: 'admin-districts',
     component: () => import('@/pages/admin/AdminDistrictsPage.vue'),
-    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'Управління районами' },
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'titles.adminDistricts' },
   },
 
   // 404
@@ -167,7 +168,7 @@ const routes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/pages/NotFoundPage.vue'),
-    meta: { title: 'Сторінку не знайдено' },
+    meta: { title: 'titles.notFound' },
   },
 ]
 
@@ -196,7 +197,7 @@ router.beforeEach((to) => {
   }
 
   if (to.meta.title) {
-    document.title = `${to.meta.title} — УрбанПлан`
+    document.title = `${i18n.global.t(to.meta.title)} — ${i18n.global.t('titles.suffix')}`
   }
 })
 

@@ -4,36 +4,33 @@ export interface Infrastructure {
   id: number
   name: string
   type: InfrastructureType
-  status: InfrastructureStatus
-  description: string
-  cost: number
-  imageUrl: string | null
   projectId: number
   projectName: string
-  districtId: number
-  districtName: string
-  cityId: number
-  cityName: string
-  latitude: number
-  longitude: number
+  status: InfrastructureStatus
+  constructionDate: string | null
+  latitude: number | null
+  longitude: number | null
   createdAt: string
   updatedAt: string
+  budget: number | null
+  projectArchitectId: number
+  imageUrl: string | null
 }
 
-export interface InfrastructureCreateRequest {
+export interface InfrastructureRequest {
   name: string
   type: InfrastructureType
-  status: InfrastructureStatus
-  description: string
-  cost: number
-  imageUrl?: string | null
   projectId: number
-  districtId: number
-  latitude: number
-  longitude: number
+  status: InfrastructureStatus
+  constructionDate?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  budget?: number | null
+  imageUrl?: string | null
 }
 
-export type InfrastructureUpdateRequest = InfrastructureCreateRequest
+export type InfrastructureCreateRequest = InfrastructureRequest
+export type InfrastructureUpdateRequest = InfrastructureRequest
 
 export interface InfrastructureFilters {
   name?: string

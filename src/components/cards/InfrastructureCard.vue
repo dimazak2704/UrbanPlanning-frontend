@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import type { Infrastructure } from '@/types/infrastructure'
 import BaseBadge from '@/components/common/BaseBadge.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
 import {
-  getInfrastructureTypeLabel,
-  getInfrastructureStatusLabel,
   getInfrastructureStatusColor,
 } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
@@ -16,6 +15,8 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const { t } = useI18n()
 
 const typeVariantMap: Record<string, string> = {
   TRANSPORT: 'blue',
@@ -46,10 +47,10 @@ const typeVariantMap: Record<string, string> = {
 
       <div class="flex flex-wrap gap-1.5 mb-3">
         <BaseBadge :variant="(typeVariantMap[infrastructure.type] || 'slate') as 'slate'">
-          {{ getInfrastructureTypeLabel(infrastructure.type) }}
+          {{ t(`enums.infrastructureType.${infrastructure.type}`) }}
         </BaseBadge>
         <BaseBadge :custom-class="getInfrastructureStatusColor(infrastructure.status)">
-          {{ getInfrastructureStatusLabel(infrastructure.status) }}
+          {{ t(`enums.infrastructureStatus.${infrastructure.status}`) }}
         </BaseBadge>
       </div>
 
@@ -62,10 +63,10 @@ const typeVariantMap: Record<string, string> = {
 
       <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
         <span class="text-sm font-semibold text-slate-900">
-          {{ formatCurrency(infrastructure.cost) }}
+          {{ formatCurrency(infrastructure.budget) }}
         </span>
         <span class="flex items-center gap-1 text-xs font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
-          Детальніше
+          {{ t('common.details') }}
           <ArrowRightIcon class="h-3.5 w-3.5" />
         </span>
       </div>

@@ -1,15 +1,15 @@
 import apiClient from './client'
-import type { MyProfile, MyProfileUpdateRequest, PasswordChangeRequest, MyStats } from '@/types/me'
+import type { Me, UpdateMeRequest, ChangePasswordRequest, MeStats } from '@/types/me'
 
 export function getMyProfile() {
-  return apiClient.get<MyProfile>('/me')
+  return apiClient.get<Me>('/me')
 }
 
-export function updateMyProfile(data: MyProfileUpdateRequest) {
-  return apiClient.put<MyProfile>('/me', data)
+export function updateMyProfile(data: UpdateMeRequest) {
+  return apiClient.put<Me>('/me', data)
 }
 
-export function changeMyPassword(data: PasswordChangeRequest) {
+export function changeMyPassword(data: ChangePasswordRequest) {
   return apiClient.put('/me/password', data)
 }
 
@@ -18,5 +18,5 @@ export function deleteMyAvatar() {
 }
 
 export function getMyStats() {
-  return apiClient.get<MyStats>('/me/stats')
+  return apiClient.get<MeStats>('/me/stats')
 }

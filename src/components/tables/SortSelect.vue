@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import BaseSelect from '@/components/common/BaseSelect.vue'
+
+const { t } = useI18n()
 
 interface SortOption {
   value: string
@@ -22,7 +25,7 @@ const emit = defineEmits<{
   <BaseSelect
     :model-value="modelValue"
     :options="options"
-    placeholder="Сортування"
+    :placeholder="t('common.sort')"
     @update:model-value="emit('update:modelValue', $event as string)"
   />
 </template>

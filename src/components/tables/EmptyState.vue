@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { InboxIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
@@ -10,11 +11,13 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  title: 'Нічого не знайдено',
-  description: 'Спробуйте змінити параметри пошуку або фільтри',
+  title: '',
+  description: '',
   actionLabel: '',
   actionTo: '',
 })
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -24,8 +27,8 @@ withDefaults(defineProps<Props>(), {
         <InboxIcon class="h-10 w-10 text-slate-400" />
       </slot>
     </div>
-    <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ title }}</h3>
-    <p class="text-sm text-slate-500 max-w-sm">{{ description }}</p>
+    <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ title || t('common.noData') }}</h3>
+    <p class="text-sm text-slate-500 max-w-sm">{{ description || t('common.noData') }}</p>
     <RouterLink
       v-if="actionLabel && actionTo"
       :to="actionTo"

@@ -7,11 +7,13 @@ import BaseInput from '@/components/common/BaseInput.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { BuildingOffice2Icon } from '@heroicons/vue/24/solid'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const toast = useToastStore()
+const { t } = useI18n()
 
 const email = ref('')
 const password = ref('')
@@ -22,18 +24,18 @@ async function handleLogin() {
   errorMessage.value = ''
 
   if (!email.value || !password.value) {
-    errorMessage.value = 'Введіть email та пароль'
+    errorMessage.value = t('auth.enterEmailAndPassword')
     return
   }
 
   loading.value = true
   try {
     await auth.login(email.value, password.value)
-    toast.success('Вхід виконано успішно')
+    toast.success(t('auth.loginSuccess'))
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Помилка входу'
+    const message = err instanceof Error ? err.message : t('auth.loginError')
     errorMessage.value = message
     toast.error(message)
   } finally {
@@ -48,14 +50,14 @@ async function handleLogin() {
       <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-600 shadow-lg shadow-primary-600/30">
         <BuildingOffice2Icon class="h-8 w-8 text-white" />
       </div>
-      <h1 class="text-2xl font-bold text-slate-900">Вхід до системи</h1>
-      <p class="mt-1.5 text-sm text-slate-500">Urban Planning Platform</p>
+      <h1 class="text-2xl font-bold text-slate-900">{{ t('auth.loginTitle') }}</h1>
+      <p class="mt-1.5 text-sm text-slate-500">{{ t('auth.loginSubtitle') }}</p>
     </div>
 
     <form class="space-y-5" @submit.prevent="handleLogin">
       <BaseInput
         v-model="email"
-        label="Email"
+        :label="t('auth.email')"
         type="email"
         placeholder="admin@urban.com"
         required
@@ -64,7 +66,7 @@ async function handleLogin() {
 
       <BaseInput
         v-model="password"
-        label="Пароль"
+        :label="t('auth.password')"
         type="password"
         placeholder="••••••••"
         required
@@ -86,19 +88,19 @@ async function handleLogin() {
         :loading="loading"
         :disabled="loading"
       >
-        Увійти
+        {{ t('auth.login') }}
       </BaseButton>
     </form>
 
     <div class="mt-6 rounded-lg bg-slate-50 border border-slate-200 p-4">
-      <p class="text-xs font-medium text-slate-500 mb-2">Тестові облікові записи:</p>
+      <p class="text-xs font-medium text-slate-500 mb-2">{{ t('auth.testAccounts') }}</p>
       <div class="space-y-1.5 text-xs text-slate-600">
         <p>
-          <span class="font-medium text-slate-700">Адмін:</span>
+          <span class="font-medium text-slate-700">{{ t('auth.admin') }}:</span>
           admin@urban.com / admin123
         </p>
         <p>
-          <span class="font-medium text-slate-700">Архітектор:</span>
+          <span class="font-medium text-slate-700">{{ t('auth.architect') }}:</span>
           ivan.shevchenko@urban.com / password123
         </p>
       </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -16,6 +17,7 @@ import {
 
 const route = useRoute()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 interface SidebarItem {
   label: string
@@ -25,16 +27,20 @@ interface SidebarItem {
 
 const cabinetLinks = computed<SidebarItem[]>(() => {
   const links: SidebarItem[] = [
-    { label: 'Дашборд', to: '/me', icon: HomeIcon },
-    { label: 'Мої проєкти', to: '/me/projects', icon: FolderIcon },
-    { label: 'Мій профіль', to: '/me/profile', icon: UserCircleIcon },
+    { label: t('me.dashboard'), to: '/me', icon: HomeIcon },
   ]
+
+  if (auth.isArchitect) {
+    links.push({ label: t('me.myProjects'), to: '/me/projects', icon: FolderIcon })
+  }
+
+  links.push({ label: t('me.profile'), to: '/me/profile', icon: UserCircleIcon })
 
   if (auth.isAdmin) {
     links.push(
-      { label: 'Користувачі', to: '/admin/users', icon: UsersIcon },
-      { label: 'Міста', to: '/admin/cities', icon: BuildingOffice2Icon },
-      { label: 'Райони', to: '/admin/districts', icon: MapIcon },
+      { label: t('admin.usersLink'), to: '/admin/users', icon: UsersIcon },
+      { label: t('admin.citiesLink'), to: '/admin/cities', icon: BuildingOffice2Icon },
+      { label: t('admin.districtsLink'), to: '/admin/districts', icon: MapIcon },
     )
   }
 

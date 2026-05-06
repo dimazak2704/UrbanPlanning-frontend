@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 interface Props {
   src?: string | null
@@ -20,6 +20,13 @@ const sizeClasses: Record<string, string> = {
 }
 
 const sizeClass = computed(() => sizeClasses[props.size])
+
+const imgError = ref(false)
+const showImage = computed(() => !!props.src && !imgError.value)
+
+// Reset error state when src changes
+import { watch } from 'vue'
+watch(() => props.src, () => { imgError.value = false })
 
 const initials = computed(() => {
   const parts = props.name.trim().split(/\s+/)
@@ -47,21 +54,19 @@ const gradientClass = computed(() => {
   }
   return gradientColors[Math.abs(hash) % gradientColors.length]
 })
-
-const hasImage = computed(() => !!props.src)
 </script>
 
 <template>
   <div :class="['relative shrink-0 rounded-full overflow-hidden', sizeClass]">
     <img
-      v-if="hasImage"
+      v-if="showImage"
       :src="src!"
       :alt="name"
       class="h-full w-full object-cover"
-      @error="($event.target as HTMLImageElement).style.display = 'none'"
+      @error="imgError = true"
     />
     <div
-      v-if="!hasImage"
+      v-if="!showImage"
       :class="[
         'flex h-full w-full items-center justify-center bg-gradient-to-br font-semibold text-white',
         gradientClass,

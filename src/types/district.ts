@@ -3,31 +3,35 @@ import type { DistrictType } from './enums'
 export interface District {
   id: number
   name: string
-  type: DistrictType
-  population: number
-  area: number
   cityId: number
   cityName: string
-  latitude: number
-  longitude: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface DistrictCreateRequest {
-  name: string
+  population: number | null
+  area: number | null
   type: DistrictType
-  population: number
-  area: number
-  cityId: number
-  latitude: number
-  longitude: number
+  latitude: number | null
+  longitude: number | null
 }
 
-export type DistrictUpdateRequest = DistrictCreateRequest
+export interface DistrictRequest {
+  name: string
+  cityId: number
+  population?: number | null
+  area?: number | null
+  type: DistrictType
+  latitude?: number | null
+  longitude?: number | null
+}
+
+export type DistrictCreateRequest = DistrictRequest
+export type DistrictUpdateRequest = DistrictRequest
 
 export interface DistrictFilters {
   name?: string
   cityId?: number
+  cityName?: string
   type?: DistrictType
+  minPopulation?: number
+  maxPopulation?: number
+  minArea?: number
+  maxArea?: number
 }

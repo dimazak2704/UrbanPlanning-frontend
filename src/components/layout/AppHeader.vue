@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { setLocale, getCurrentLocale, type SupportedLocale } from '@/i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import {
   Bars3Icon,
@@ -16,21 +18,30 @@ import { useAuthStore } from '@/stores/auth.store'
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const mobileMenuOpen = ref(false)
+
+const currentLang = ref<SupportedLocale>(getCurrentLocale())
+
+function toggleLanguage() {
+  const newLang = currentLang.value === 'uk' ? 'en' : 'uk'
+  setLocale(newLang)
+  currentLang.value = newLang
+}
 
 interface NavLink {
   label: string
   to: string
 }
 
-const navLinks: NavLink[] = [
-  { label: 'Головна', to: '/' },
-  { label: 'Карта', to: '/map' },
-  { label: 'Міста', to: '/cities' },
-  { label: 'Проєкти', to: '/projects' },
-  { label: 'Інфраструктура', to: '/infrastructures' },
-  { label: 'Архітектори', to: '/architects' },
-]
+const navLinks = computed(() => [
+  { label: t('header.home'), to: '/' },
+  { label: t('header.map'), to: '/map' },
+  { label: t('header.cities'), to: '/cities' },
+  { label: t('header.projects'), to: '/projects' },
+  { label: t('header.infrastructures'), to: '/infrastructures' },
+  { label: t('header.architects'), to: '/architects' },
+])
 
 function getUserInitials(): string {
   if (!auth.user?.email) return '?'
@@ -74,6 +85,15 @@ function closeMobile() {
 
       <!-- Right side -->
       <div class="flex items-center gap-3">
+        <!-- Language Switcher -->
+        <button
+          @click="toggleLanguage"
+          class="flex items-center justify-center h-9 w-12 rounded-lg bg-slate-100 text-lg hover:bg-slate-200 transition-colors"
+          :title="t('header.language')"
+        >
+          {{ currentLang === 'uk' ? '🇺🇦' : '🇬🇧' }}
+        </button>
+
         <!-- Not auth: login button -->
         <RouterLink
           v-if="!auth.isAuthenticated"
@@ -81,7 +101,7 @@ function closeMobile() {
           class="hidden sm:inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         >
           <ArrowRightOnRectangleIcon class="h-4 w-4" />
-          Увійти
+          {{ t('auth.login') }}
         </RouterLink>
 
         <!-- Auth: user dropdown -->
@@ -120,7 +140,7 @@ function closeMobile() {
                     ]"
                   >
                     <UserCircleIcon class="h-4 w-4 text-slate-400" />
-                    Кабінет
+                    {{ t('header.cabinet') }}
                   </RouterLink>
                 </MenuItem>
 
@@ -133,7 +153,7 @@ function closeMobile() {
                     ]"
                   >
                     <Cog6ToothIcon class="h-4 w-4 text-slate-400" />
-                    Адмінка
+                    {{ t('header.admin') }}
                   </RouterLink>
                 </MenuItem>
 
@@ -148,7 +168,7 @@ function closeMobile() {
                     @click="handleLogout"
                   >
                     <ArrowRightOnRectangleIcon class="h-4 w-4" />
-                    Вийти
+                    {{ t('auth.logout') }}
                   </button>
                 </MenuItem>
               </div>
@@ -199,7 +219,7 @@ function closeMobile() {
               class="block rounded-lg px-3 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50"
               @click="closeMobile"
             >
-              Увійти
+              {{ t('auth.login') }}
             </RouterLink>
             <template v-else>
               <RouterLink
@@ -207,7 +227,7 @@ function closeMobile() {
                 class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
                 @click="closeMobile"
               >
-                Кабінет
+                {{ t('header.cabinet') }}
               </RouterLink>
               <RouterLink
                 v-if="auth.isAdmin"
@@ -215,13 +235,13 @@ function closeMobile() {
                 class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
                 @click="closeMobile"
               >
-                Адмінка
+                {{ t('header.admin') }}
               </RouterLink>
               <button
                 class="block w-full text-left rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
                 @click="handleLogout"
               >
-                Вийти
+                {{ t('auth.logout') }}
               </button>
             </template>
           </div>

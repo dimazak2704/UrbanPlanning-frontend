@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import type { Architect } from '@/types/architect'
 import AvatarImg from '@/components/common/AvatarImg.vue'
 import { BriefcaseIcon, FolderIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
@@ -9,6 +10,7 @@ interface Props {
 }
 
 defineProps<Props>()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -33,17 +35,17 @@ defineProps<Props>()
     <div class="grid grid-cols-2 gap-3">
       <div class="flex items-center gap-2 text-sm text-slate-600">
         <BriefcaseIcon class="h-4 w-4 text-slate-400" />
-        <span>{{ architect.experienceYears }} р. досвіду</span>
+        <span>{{ architect.experienceYears }} {{ t('common.years') }}</span>
       </div>
       <div class="flex items-center gap-2 text-sm text-slate-600">
         <FolderIcon class="h-4 w-4 text-slate-400" />
-        <span>{{ architect.projectsCount }} проєктів</span>
+        <span>{{ architect.projectsCount }} {{ t('architects.projectsCount') }}</span>
       </div>
     </div>
 
     <div class="mt-4 flex items-center justify-end border-t border-slate-100 pt-3">
       <span class="flex items-center gap-1 text-xs font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
-        Детальніше
+        {{ t('common.details') }}
         <ArrowRightIcon class="h-3.5 w-3.5" />
       </span>
     </div>

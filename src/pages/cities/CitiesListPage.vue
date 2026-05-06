@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { PlusIcon } from '@heroicons/vue/24/outline'
 
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -21,6 +22,7 @@ import type { CityFilters } from '@/types/city'
 
 const auth = useAuthStore()
 const toast = useToastStore()
+const { t } = useI18n()
 
 const defaultFilters: CityFilters = {
   name: '',
@@ -35,14 +37,14 @@ const pagination = usePagination({ defaultSize: 12 })
 const sort = ref('name,asc')
 const cities = ref<City[]>([])
 
-const sortOptions = [
-  { value: 'name,asc', label: 'Назва А → Я' },
-  { value: 'name,desc', label: 'Назва Я → А' },
-  { value: 'population,desc', label: 'Населення ↓' },
-  { value: 'population,asc', label: 'Населення ↑' },
-  { value: 'area,desc', label: 'Площа ↓' },
-  { value: 'area,asc', label: 'Площа ↑' },
-]
+const sortOptions = computed(() => [
+  { value: 'name,asc', label: t('cities.sortNameAsc') },
+  { value: 'name,desc', label: t('cities.sortNameDesc') },
+  { value: 'population,desc', label: t('cities.sortPopDesc') },
+  { value: 'population,asc', label: t('cities.sortPopAsc') },
+  { value: 'area,desc', label: t('cities.sortAreaDesc') },
+  { value: 'area,asc', label: t('cities.sortAreaAsc') },
+])
 
 async function fetchCities() {
   pagination.loading.value = true
@@ -55,7 +57,7 @@ async function fetchCities() {
     cities.value = data.content
     pagination.updateFromResponse(data)
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Помилка завантаження міст')
+    toast.error(err instanceof Error ? err.message : t('cities.loadError'))
   } finally {
     pagination.loading.value = false
   }
@@ -77,9 +79,9 @@ onMounted(fetchCities)
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">Міста України</h1>
+        <h1 class="text-3xl font-bold text-slate-900">{{ t('cities.title') }}</h1>
         <p class="mt-1 text-sm text-slate-500">
-          {{ pagination.totalElements.value }} міст у базі
+          {{ t('cities.totalCount', { count: pagination.totalElements.value }) }}
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -92,7 +94,7 @@ onMounted(fetchCities)
           class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700"
         >
           <PlusIcon class="h-4 w-4" />
-          Додати місто
+          {{ t('cities.addCity') }}
         </RouterLink>
       </div>
     </div>
@@ -103,23 +105,23 @@ onMounted(fetchCities)
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <BaseInput
             v-model="filters.name"
-            label="Назва міста"
-            placeholder="Пошук за назвою..."
+            :label="t('cities.cityName')"
+            :placeholder="t('cities.searchByName')"
           />
           <BaseInput
             v-model="filters.region"
-            label="Регіон"
-            placeholder="Київська область..."
+            :label="t('cities.region')"
+            :placeholder="t('cities.regionPlaceholder')"
           />
           <BaseInput
             v-model="filters.minPopulation"
-            label="Населення від"
+            :label="t('cities.populationFrom')"
             type="number"
             placeholder="0"
           />
           <BaseInput
             v-model="filters.maxPopulation"
-            label="Населення до"
+            :label="t('cities.populationTo')"
             type="number"
             placeholder="10 000 000"
           />
@@ -135,8 +137,8 @@ onMounted(fetchCities)
     <!-- Empty -->
     <EmptyState
       v-else-if="cities.length === 0"
-      title="Міст не знайдено"
-      description="Спробуйте змінити параметри пошуку або фільтри"
+      :title="t('cities.notFound')"
+      :description="t('cities.notFoundDescription')"
     />
 
     <!-- Grid -->

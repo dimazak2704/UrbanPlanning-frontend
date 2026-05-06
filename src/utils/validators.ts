@@ -1,16 +1,19 @@
 import { helpers, required, email, minLength, minValue, maxValue } from '@vuelidate/validators'
+import i18n from '@/i18n'
 
-export const requiredField = helpers.withMessage('Це поле обовʼязкове', required)
-export const emailField = helpers.withMessage('Невірний формат email', email)
+const { t } = i18n.global as any
+
+export const requiredField = helpers.withMessage(() => t('validation.required'), required)
+export const emailField = helpers.withMessage(() => t('validation.email'), email)
 
 export function minLengthField(length: number) {
-  return helpers.withMessage(`Мінімум ${length} символів`, minLength(length))
+  return helpers.withMessage(() => t('validation.minLength', { min: length }), minLength(length))
 }
 
 export function minValueField(min: number) {
-  return helpers.withMessage(`Мінімальне значення: ${min}`, minValue(min))
+  return helpers.withMessage(() => t('validation.minValue', { min }), minValue(min))
 }
 
 export function maxValueField(max: number) {
-  return helpers.withMessage(`Максимальне значення: ${max}`, maxValue(max))
+  return helpers.withMessage(() => t('validation.maxValue', { max }), maxValue(max))
 }

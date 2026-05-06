@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -18,6 +19,7 @@ import { useToastStore } from '@/stores/toast.store'
 import type { City, CityCreateRequest, CityFilters } from '@/types/city'
 
 const toast = useToastStore()
+const { t } = useI18n()
 const loading = ref(true)
 const cities = ref<City[]>([])
 
@@ -32,7 +34,7 @@ async function fetchCities() {
     cities.value = data.content
     setTotal(data.totalElements, data.totalPages)
   } catch {
-    toast.error('Помилка завантаження міст')
+    toast.error(t('cities.loadError'))
   } finally {
     loading.value = false
   }
@@ -77,15 +79,15 @@ async function handleSave() {
   try {
     if (isEdit.value) {
       await updateCity(currentId.value, form.value)
-      toast.success('Місто оновлено')
+      toast.success(t('cities.updateSuccess'))
     } else {
       await createCity(form.value)
-      toast.success('Місто створено')
+      toast.success(t('cities.createSuccess'))
     }
     showModal.value = false
     fetchCities()
   } catch {
-    toast.error('Помилка збереження')
+    toast.error(t('cities.saveError'))
   } finally {
     saving.value = false
   }
@@ -97,11 +99,11 @@ async function confirmDelete() {
   if (!itemToDelete.value) return
   try {
     await deleteCity(itemToDelete.value.id)
-    toast.success('Місто видалено')
+    toast.success(t('cities.deleteSuccess'))
     if (cities.value.length === 1 && page.value > 0) page.value--
     else fetchCities()
   } catch {
-    toast.error('Помилка видалення')
+    toast.error(t('cities.deleteError'))
   } finally {
     itemToDelete.value = null
   }
@@ -111,13 +113,13 @@ async function confirmDelete() {
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-slate-900">Управління містами</h1>
-      <BaseButton @click="openCreate"><template #iconLeft><PlusIcon class="h-4 w-4" /></template>Додати місто</BaseButton>
+      <h1 class="text-2xl font-bold text-slate-900">{{ t('admin.citiesManagement') }}</h1>
+      <BaseButton @click="openCreate"><template #iconLeft><PlusIcon class="h-4 w-4" /></template>{{ t('cities.addCity') }}</BaseButton>
     </div>
 
     <FilterPanel @reset="filters = { name: '', region: '' }">
-      <BaseInput v-model="filters.name" placeholder="Пошук за назвою..." />
-      <BaseInput v-model="filters.region" placeholder="Регіон..." />
+      <BaseInput v-model="filters.name" :placeholder="t('cities.searchByName')" />
+      <BaseInput v-model="filters.region" :placeholder="t('cities.regionPlaceholder')" />
     </FilterPanel>
 
     <div class="card p-0 overflow-hidden">
@@ -126,11 +128,11 @@ async function confirmDelete() {
           <thead class="bg-slate-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Назва</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Регіон</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Населення</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Площа (кв.км)</th>
-              <th scope="col" class="relative px-6 py-3"><span class="sr-only">Дії</span></th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.cityName') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.region') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.population') }}</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{{ t('cities.area') }} ({{ t('common.km2') }})</th>
+              <th scope="col" class="relative px-6 py-3"><span class="sr-only">{{ t('common.actions') }}</span></th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-slate-200">
@@ -139,7 +141,7 @@ async function confirmDelete() {
             </tr>
             <tr v-else-if="cities.length === 0">
               <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                <EmptyState title="Не знайдено" description="Спробуйте змінити фільтри пошуку." />
+                <EmptyState :title="t('cities.notFound')" :description="t('cities.notFoundDescription')" />
               </td>
             </tr>
             <tr v-else v-for="city in cities" :key="city.id" class="hover:bg-slate-50">
@@ -165,31 +167,31 @@ async function confirmDelete() {
       </div>
     </div>
 
-    <BaseModal v-model="showModal" :title="isEdit ? 'Редагувати місто' : 'Нове місто'" size="lg">
+    <BaseModal v-model="showModal" :title="isEdit ? t('cities.editCity') : t('cities.addCity')" size="lg">
       <form @submit.prevent="handleSave" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseInput v-model="form.name" label="Назва *" required />
-          <BaseInput v-model="form.region" label="Регіон *" required />
+          <BaseInput v-model="form.name" :label="t('cities.cityName') + ' *'" required />
+          <BaseInput v-model="form.region" :label="t('cities.region') + ' *'" required />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseInput v-model="form.population" type="number" label="Населення" />
-          <BaseInput v-model="form.area" type="number" label="Площа (кв.км)" />
+          <BaseInput v-model="form.population" type="number" :label="t('cities.population')" />
+          <BaseInput v-model="form.area" type="number" :label="t('cities.area')" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Локація на карті</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('cities.map') }}</label>
           <LocationPicker v-model="location" />
         </div>
         <div class="flex justify-end gap-3 pt-4">
-          <BaseButton type="button" variant="secondary" @click="showModal = false">Скасувати</BaseButton>
-          <BaseButton type="submit" :loading="saving">Зберегти</BaseButton>
+          <BaseButton type="button" variant="secondary" @click="showModal = false">{{ t('common.cancel') }}</BaseButton>
+          <BaseButton type="submit" :loading="saving">{{ t('common.save') }}</BaseButton>
         </div>
       </form>
     </BaseModal>
 
     <ConfirmDialog
       v-model="itemToDelete !== null"
-      title="Видалити місто?"
-      :message="`Ви впевнені, що хочете видалити місто ${itemToDelete?.name}?`"
+      :title="t('cities.deleteConfirmTitle')"
+      :message="t('cities.deleteConfirmDesc')"
       @confirm="confirmDelete"
       @cancel="itemToDelete = null"
     />

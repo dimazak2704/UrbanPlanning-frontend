@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, RouterLink, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   ChevronRightIcon,
   UsersIcon,
@@ -20,7 +21,7 @@ import { getDistrictById } from '@/api/districts.api'
 import { getProjects } from '@/api/projects.api'
 import { useToastStore } from '@/stores/toast.store'
 import { formatNumber } from '@/utils/format'
-import { getDistrictTypeLabel, getDistrictTypeColor } from '@/utils/enum-labels'
+import { getDistrictTypeColor } from '@/utils/enum-labels'
 
 import type { District } from '@/types/district'
 import type { Project } from '@/types/project'
@@ -28,6 +29,7 @@ import type { Project } from '@/types/project'
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const { t } = useI18n()
 
 const districtId = computed(() => Number(route.params.id))
 const loading = ref(true)
@@ -46,7 +48,7 @@ async function fetchDistrict() {
     const { data } = await getDistrictById(districtId.value)
     district.value = data
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : 'Помилка завантаження району')
+    toast.error(err instanceof Error ? err.message : t('districts.loadError'))
     router.push('/cities')
   } finally {
     loading.value = false
@@ -76,7 +78,7 @@ function initMap() {
 
   L.marker([district.value.latitude, district.value.longitude])
     .addTo(map)
-    .bindPopup(`<b>${district.value.name}</b><br>${getDistrictTypeLabel(district.value.type)}`)
+    .bindPopup(`<b>${district.value.name}</b><br>${t(`enums.districtType.${district.value.type}`)}`)
 }
 
 watch(() => projectsPage.value, fetchProjects)
@@ -96,9 +98,9 @@ onMounted(async () => {
       <!-- Breadcrumbs -->
       <div class="sticky top-16 z-40 -mx-4 px-4 py-3 bg-slate-50/90 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mb-6 border-b border-slate-200">
         <nav class="flex items-center gap-1.5 text-sm text-slate-500 flex-wrap">
-          <RouterLink to="/" class="hover:text-slate-700 transition-colors">Головна</RouterLink>
+          <RouterLink to="/" class="hover:text-slate-700 transition-colors">{{ t('header.home') }}</RouterLink>
           <ChevronRightIcon class="h-3.5 w-3.5" />
-          <RouterLink to="/cities" class="hover:text-slate-700 transition-colors">Міста</RouterLink>
+          <RouterLink to="/cities" class="hover:text-slate-700 transition-colors">{{ t('header.cities') }}</RouterLink>
           <ChevronRightIcon class="h-3.5 w-3.5" />
           <RouterLink :to="`/cities/${district.cityId}`" class="hover:text-slate-700 transition-colors">
             {{ district.cityName }}
@@ -114,7 +116,7 @@ onMounted(async () => {
           <div class="flex items-center gap-3 mb-1">
             <h1 class="text-4xl font-bold text-slate-900">{{ district.name }}</h1>
             <BaseBadge :custom-class="getDistrictTypeColor(district.type)">
-              {{ getDistrictTypeLabel(district.type) }}
+              {{ t(`enums.districtType.${district.type}`) }}
             </BaseBadge>
           </div>
           <p class="text-lg text-slate-500">
@@ -128,21 +130,21 @@ onMounted(async () => {
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <UsersIcon class="h-4 w-4" />
-            Населення
+            {{ t('cities.population') }}
           </div>
           <p class="text-2xl font-bold text-slate-900">{{ formatNumber(district.population) }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <ArrowsPointingOutIcon class="h-4 w-4" />
-            Площа
+            {{ t('cities.area') }}
           </div>
-          <p class="text-2xl font-bold text-slate-900">{{ formatNumber(district.area) }} км²</p>
+          <p class="text-2xl font-bold text-slate-900">{{ formatNumber(district.area) }} {{ t('common.km2') }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
           <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
             <FolderIcon class="h-4 w-4" />
-            Проєктів
+            {{ t('architects.projectsCount') }}
           </div>
           <p class="text-2xl font-bold text-slate-900">{{ projectsTotalElements }}</p>
         </div>
@@ -150,17 +152,17 @@ onMounted(async () => {
 
       <!-- Map -->
       <div class="mb-10">
-        <h2 class="text-xl font-semibold text-slate-900 mb-4">Карта</h2>
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">{{ t('cities.map') }}</h2>
         <div ref="mapContainer" class="h-72 rounded-xl border border-slate-200 overflow-hidden z-0" />
       </div>
 
       <!-- Projects -->
       <div>
         <h2 class="text-xl font-semibold text-slate-900 mb-4">
-          Проєкти району ({{ projectsTotalElements }})
+          {{ t('districts.projects', { count: projectsTotalElements }) }}
         </h2>
 
-        <EmptyState v-if="projects.length === 0" title="Проєктів не знайдено" />
+        <EmptyState v-if="projects.length === 0" :title="t('projects.notFound')" />
         <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <ProjectCard v-for="p in projects" :key="p.id" :project="p" />
         </div>

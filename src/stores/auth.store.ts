@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 
 import { login as apiLogin } from '@/api/auth.api'
 import apiClient from '@/api/client'
-import type { AuthUser, MyProfile } from '@/types/me'
+import type { AuthUser, Me } from '@/types/me'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe() {
     try {
-      const { data } = await apiClient.get<MyProfile>('/me')
+      const { data } = await apiClient.get<Me>('/me')
       if (user.value) {
         user.value.email = data.email
         user.value.role = data.role
