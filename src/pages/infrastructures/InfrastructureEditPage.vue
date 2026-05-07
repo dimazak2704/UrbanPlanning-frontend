@@ -9,8 +9,9 @@ import LocationPicker from '@/components/forms/LocationPicker.vue'
 import ImageUploader from '@/components/forms/ImageUploader.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { getInfrastructureById, createInfrastructure, updateInfrastructure } from '@/api/infrastructures.api'
-import { getProjects } from '@/api/projects.api'
+import { getProjects, getProjectById, getMyProjects } from '@/api/projects.api'
 import { useToastStore } from '@/stores/toast.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { INFRASTRUCTURE_TYPE_LABELS, INFRASTRUCTURE_STATUS_LABELS } from '@/utils/enum-labels'
 import type { InfrastructureCreateRequest } from '@/types/infrastructure'
 import {
@@ -23,6 +24,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const auth = useAuthStore()
 const { t } = useI18n()
 const isEdit = computed(() => !!route.params.id)
 const itemId = computed(() => Number(route.params.id) || 0)
@@ -36,7 +38,9 @@ const form = ref<InfrastructureCreateRequest>({
 })
 
 const location = ref<{ lat: number; lng: number } | null>(null)
+const focusLocation = ref<{ lat: number; lng: number } | null>(null)
 const projectOptions = ref<{ value: number; label: string }[]>([])
+const projectLocations = ref<Record<number, { lat: number; lng: number }>>({})
 const typeOptions = computed(() =>
   INFRASTRUCTURE_TYPE_VALUES.map((value) => ({ value, label: INFRASTRUCTURE_TYPE_LABELS[value] })),
 )
@@ -70,7 +74,20 @@ async function onSubmit() {
 }
 
 onMounted(async () => {
-  try { const { data } = await getProjects(undefined, { size: 100 }); projectOptions.value = data.content.map((p) => ({ value: p.id, label: p.name })) } catch { /* ignore */ }
+  try {
+    const response = auth.isArchitect
+      ? await getMyProjects(undefined, { size: 100, sort: 'updatedAt,desc' })
+      : await getProjects(undefined, { size: 100, sort: 'updatedAt,desc' })
+    projectOptions.value = response.data.content.map((p) => ({ value: p.id, label: p.name }))
+    projectLocations.value = Object.fromEntries(
+      response.data.content
+        .filter((p) => p.latitude !== null && p.longitude !== null)
+        .map((p) => [p.id, { lat: p.latitude as number, lng: p.longitude as number }]),
+    )
+    if (!isEdit.value && form.value.projectId) {
+      focusLocation.value = projectLocations.value[form.value.projectId] ?? null
+    }
+  } catch { /* ignore */ }
 
   if (isEdit.value) {
     try {
@@ -84,10 +101,30 @@ onMounted(async () => {
       }
       if (data.latitude && data.longitude) {
         location.value = { lat: data.latitude, lng: data.longitude }
+        focusLocation.value = { lat: data.latitude, lng: data.longitude }
       }
     } catch { toast.error(t('infrastructures.loadError')); router.push('/infrastructures') }
   }
   loading.value = false
+})
+
+watch(() => form.value.projectId, async (projectId) => {
+  if (!projectId) return
+  const known = projectLocations.value[projectId]
+  if (known) {
+    focusLocation.value = known
+    return
+  }
+  try {
+    const { data } = await getProjectById(projectId)
+    if (data.latitude !== null && data.longitude !== null) {
+      const coords = { lat: data.latitude, lng: data.longitude }
+      focusLocation.value = coords
+      projectLocations.value[projectId] = coords
+    }
+  } catch {
+    // ignore, keep manual picker
+  }
 })
 </script>
 
@@ -107,7 +144,7 @@ onMounted(async () => {
       </div>
       <BaseInput v-model="form.constructionDate" :label="t('infrastructures.form.constructionDate')" type="date" />
       <div><label class="mb-2 block text-sm font-medium text-ink dark:text-paper">{{ t('projects.form.photo') }}</label><ImageUploader v-model="form.imageUrl" endpoint="infrastructures" /></div>
-      <div><label class="mb-2 block text-sm font-medium text-ink dark:text-paper">{{ t('map.location') }}</label><LocationPicker v-model="location" /></div>
+      <div><label class="mb-2 block text-sm font-medium text-ink dark:text-paper">{{ t('map.location') }}</label><LocationPicker v-model="location" :focus-location="focusLocation" :focus-zoom="14" /></div>
       <div class="flex justify-end gap-3 border-t border-ink/10 pt-4 dark:border-night-border">
         <BaseButton variant="secondary" type="button" @click="router.back()">{{ t('common.cancel') }}</BaseButton>
         <BaseButton type="submit" :disabled="saving">{{ t('common.save') }}</BaseButton>

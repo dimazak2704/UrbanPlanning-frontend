@@ -168,6 +168,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/admin/AdminDistrictsPage.vue'),
     meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'titles.adminDistricts' },
   },
+  {
+    path: '/admin/projects',
+    name: 'admin-projects',
+    component: () => import('@/pages/admin/AdminProjectsPage.vue'),
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'titles.adminProjects' },
+  },
+  {
+    path: '/admin/infrastructures',
+    name: 'admin-infrastructures',
+    component: () => import('@/pages/admin/AdminInfrastructuresPage.vue'),
+    meta: { requiresAuth: true, requiresRole: 'ADMIN', layout: 'cabinet', title: 'titles.adminInfrastructures' },
+  },
 
   // 404
   {

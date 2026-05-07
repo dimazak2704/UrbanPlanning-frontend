@@ -12,11 +12,15 @@ interface LatLng {
 interface Props {
   modelValue: LatLng | null
   initialCenter?: LatLng
+  focusLocation?: LatLng | null
+  focusZoom?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: null,
   initialCenter: () => ({ lat: 49.0, lng: 32.0 }),
+  focusLocation: null,
+  focusZoom: 13,
 })
 
 const emit = defineEmits<{
@@ -76,6 +80,11 @@ function getMyLocation() {
 
 watch(() => props.modelValue, (val) => {
   if (val) { updateMarker(val.lat, val.lng) }
+}, { deep: true })
+
+watch(() => props.focusLocation, (val) => {
+  if (!map || !val) return
+  map.setView([val.lat, val.lng], props.focusZoom)
 }, { deep: true })
 
 onMounted(() => {

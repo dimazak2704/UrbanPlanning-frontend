@@ -82,6 +82,10 @@ function onEdit(project: Project) {
   router.push(`/projects/${project.id}/edit`)
 }
 
+function onAddInfrastructure(project: Project) {
+  router.push(`/infrastructures/new?projectId=${project.id}`)
+}
+
 function askDelete(project: Project) {
   projectToDelete.value = project
 }
@@ -128,7 +132,16 @@ async function confirmDelete() {
     </div>
     <div v-else>
       <div class="mb-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <ProjectCard v-for="p in projects" :key="p.id" :project="p" showActions @edit="onEdit" @delete="askDelete" />
+        <ProjectCard
+          v-for="p in projects"
+          :key="p.id"
+          :project="p"
+          show-actions
+          show-add-infrastructure-action
+          @edit="onEdit"
+          @delete="askDelete"
+          @add-infrastructure="onAddInfrastructure"
+        />
       </div>
       <Pagination :current-page="pagination.page.value" :total-pages="pagination.totalPages.value" :total-elements="pagination.totalElements.value" :page-size="pagination.size.value" @update:page="pagination.setPage" @update:size="pagination.setSize" />
     </div>

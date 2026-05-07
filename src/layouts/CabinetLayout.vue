@@ -10,6 +10,7 @@ import {
   PhBuildings,
   PhFolder,
   PhHouse,
+  PhLightning,
   PhMapPin,
   PhUser,
   PhUsersThree,
@@ -41,6 +42,8 @@ const cabinetLinks = computed<SidebarItem[]>(() => {
       { label: t('admin.usersLink'), to: '/admin/users', icon: PhUsersThree },
       { label: t('admin.citiesLink'), to: '/admin/cities', icon: PhBuildings },
       { label: t('admin.districtsLink'), to: '/admin/districts', icon: PhMapPin },
+      { label: t('admin.projectsLink'), to: '/admin/projects', icon: PhFolder },
+      { label: t('admin.infrastructuresLink'), to: '/admin/infrastructures', icon: PhLightning },
     )
   }
 

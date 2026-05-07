@@ -96,6 +96,8 @@
     "adminUsers": "Адмін: користувачі",
     "adminCities": "Адмін: міста",
     "adminDistricts": "Адмін: райони",
+    "adminProjects": "Адмін: проєкти",
+    "adminInfrastructures": "Адмін: інфраструктура",
     "notFound": "Сторінку не знайдено"
   },
   "home": {
@@ -399,9 +401,13 @@
     "usersLink": "Користувачі",
     "citiesLink": "Міста",
     "districtsLink": "Райони",
+    "projectsLink": "Проєкти",
+    "infrastructuresLink": "Інфраструктура",
     "citiesManagement": "Управління містами",
     "districtsManagement": "Управління районами",
     "usersManagement": "Управління користувачами",
+    "projectsManagement": "Управління проєктами",
+    "infrastructuresManagement": "Управління інфраструктурою",
     "id": "ID",
     "user": "Користувач",
     "role": "Роль",

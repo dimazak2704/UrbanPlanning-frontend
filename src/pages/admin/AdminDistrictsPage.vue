@@ -47,11 +47,17 @@ const typeOptions = computed(() => [
   { value: 'MIXED', label: t('enums.districtType.MIXED') },
 ])
 const cityOptions = ref<{value: number, label: string}[]>([])
+const cityLocations = ref<Record<number, { lat: number; lng: number }>>({})
 
 async function fetchCities() {
   try {
     const { data } = await getCities(undefined, { size: 100 })
     cityOptions.value = data.content.map(c => ({ value: c.id, label: c.name }))
+    cityLocations.value = Object.fromEntries(
+      data.content
+        .filter((c) => c.latitude !== null && c.longitude !== null)
+        .map((c) => [c.id, { lat: c.latitude as number, lng: c.longitude as number }]),
+    )
   } catch {
     /* ignore */
   }
@@ -85,18 +91,25 @@ const isEdit = ref(false)
 const saving = ref(false)
 const currentId = ref(0)
 const location = ref<{lat: number, lng: number} | null>(null)
+const focusLocation = ref<{lat: number, lng: number} | null>(null)
 const form = ref<DistrictCreateRequest>({
-  name: '', type: 'RESIDENTIAL', population: 0, area: 0, cityId: 0, latitude: 0, longitude: 0
+  name: '', type: 'RESIDENTIAL', population: 0, area: 0, cityId: 0, latitude: null, longitude: null
 })
 
 watch(location, (val) => {
   if (val) { form.value.latitude = val.lat; form.value.longitude = val.lng }
 }, { deep: true })
 
+watch(() => form.value.cityId, (cityId) => {
+  focusLocation.value = cityLocations.value[cityId] ?? null
+})
+
 function openCreate() {
   isEdit.value = false
-  form.value = { name: '', type: 'RESIDENTIAL', population: 0, area: 0, cityId: cityOptions.value.length > 0 ? cityOptions.value[0].value : 0, latitude: 48.3794, longitude: 31.1656 }
-  location.value = { lat: 48.3794, lng: 31.1656 }
+  const cityId = cityOptions.value.length > 0 ? cityOptions.value[0].value : 0
+  form.value = { name: '', type: 'RESIDENTIAL', population: 0, area: 0, cityId, latitude: null, longitude: null }
+  location.value = null
+  focusLocation.value = cityLocations.value[cityId] ?? null
   showModal.value = true
 }
 
@@ -104,7 +117,12 @@ function openEdit(district: District) {
   isEdit.value = true
   currentId.value = district.id
   form.value = { ...district }
-  location.value = { lat: district.latitude, lng: district.longitude }
+  location.value = district.latitude !== null && district.longitude !== null
+    ? { lat: district.latitude, lng: district.longitude }
+    : null
+  focusLocation.value = district.latitude !== null && district.longitude !== null
+    ? { lat: district.latitude, lng: district.longitude }
+    : (cityLocations.value[district.cityId] ?? null)
   showModal.value = true
 }
 
@@ -240,7 +258,7 @@ function getTypeColor(type: DistrictType) {
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('cities.map') }}</label>
-          <LocationPicker v-model="location" />
+          <LocationPicker v-model="location" :focus-location="focusLocation" :focus-zoom="11" />
         </div>
         <div class="flex justify-end gap-3 pt-4">
           <BaseButton type="button" variant="secondary" @click="showModal = false">{{ t('common.cancel') }}</BaseButton>

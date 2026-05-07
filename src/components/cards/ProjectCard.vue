@@ -6,11 +6,12 @@ import BaseBadge from '@/components/common/BaseBadge.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
 import { getProjectStatusColor } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
-import { PhArrowRight, PhMapPin, PhPencilSimple, PhTrash, PhUser } from '@phosphor-icons/vue'
+import { PhArrowRight, PhMapPin, PhPencilSimple, PhPlus, PhTrash, PhUser } from '@phosphor-icons/vue'
 
 interface Props {
   project: Project
   showActions?: boolean
+  showAddInfrastructureAction?: boolean
 }
 
 defineProps<Props>()
@@ -18,6 +19,7 @@ defineProps<Props>()
 const emit = defineEmits<{
   (e: 'edit', project: Project): void
   (e: 'delete', project: Project): void
+  (e: 'addInfrastructure', project: Project): void
 }>()
 
 const { t } = useI18n()
@@ -29,6 +31,13 @@ const { t } = useI18n()
     class="card-unified group"
   >
     <div v-if="showActions" class="absolute right-3 top-3 z-10 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <button
+        v-if="showAddInfrastructureAction"
+        @click.prevent="emit('addInfrastructure', project)"
+        class="border border-ink/15 bg-paper/90 p-2 text-ink-muted transition-colors hover:border-accent hover:text-accent dark:border-paper/30 dark:bg-night/85 dark:text-paper/65"
+      >
+        <PhPlus :size="14" weight="light" />
+      </button>
       <button @click.prevent="emit('edit', project)" class="border border-ink/15 bg-paper/90 p-2 text-ink-muted transition-colors hover:border-ink hover:text-ink dark:border-paper/30 dark:bg-night/85 dark:text-paper/65 dark:hover:border-paper dark:hover:text-paper">
         <PhPencilSimple :size="14" weight="light" />
       </button>

@@ -96,6 +96,8 @@
     "adminUsers": "Admin: Users",
     "adminCities": "Admin: Cities",
     "adminDistricts": "Admin: Districts",
+    "adminProjects": "Admin: Projects",
+    "adminInfrastructures": "Admin: Infrastructure",
     "notFound": "Page Not Found"
   },
   "home": {
@@ -399,9 +401,13 @@
     "usersLink": "Users",
     "citiesLink": "Cities",
     "districtsLink": "Districts",
+    "projectsLink": "Projects",
+    "infrastructuresLink": "Infrastructure",
     "citiesManagement": "City Management",
     "districtsManagement": "District Management",
     "usersManagement": "User Management",
+    "projectsManagement": "Project Management",
+    "infrastructuresManagement": "Infrastructure Management",
     "id": "ID",
     "user": "User",
     "role": "Role",

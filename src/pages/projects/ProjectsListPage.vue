@@ -20,6 +20,7 @@ import { useFilters } from '@/composables/useFilters'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { PROJECT_STATUS_LABELS } from '@/utils/enum-labels'
+import { PROJECT_STATUS_VALUES } from '@/types/enums'
 import type { Project, ProjectFilters } from '@/types/project'
 
 const auth = useAuthStore()
@@ -34,7 +35,9 @@ const projects = ref<Project[]>([])
 const cityOptions = ref<{ value: number; label: string }[]>([])
 const districtOptions = ref<{ value: number; label: string }[]>([])
 const architectOptions = ref<{ value: number; label: string }[]>([])
-const statusOptions = computed(() => Object.entries(PROJECT_STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })))
+const statusOptions = computed(() =>
+  PROJECT_STATUS_VALUES.map((value) => ({ value, label: PROJECT_STATUS_LABELS[value] })),
+)
 const sortOptions = computed(() => [
   { value: 'updatedAt,desc', label: t('projects.sortNewest') },
   { value: 'updatedAt,asc', label: t('projects.sortOldest') },
