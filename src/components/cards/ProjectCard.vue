@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import type { Project } from '@/types/project'
 import BaseBadge from '@/components/common/BaseBadge.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
+import CompareCheckbox from '@/components/compare/CompareCheckbox.vue'
 import { getProjectStatusColor } from '@/utils/enum-labels'
 import { formatCurrency } from '@/utils/format'
 import { PhArrowRight, PhMapPin, PhPencilSimple, PhPlus, PhTrash, PhUser } from '@phosphor-icons/vue'
@@ -66,6 +67,7 @@ const { t } = useI18n()
         <h3 class="line-clamp-2 font-serif text-xl font-medium leading-tight tracking-tight text-ink transition-colors group-hover:text-accent dark:text-paper">
           {{ project.name }}
         </h3>
+        <CompareCheckbox :project="project" />
       </div>
 
       <div class="space-y-2 text-sm text-ink-muted dark:text-paper/70">

@@ -75,6 +75,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresRole: ['ADMIN', 'ARCHITECT'], title: 'titles.projectEdit' },
   },
   {
+    path: '/projects/compare',
+    name: 'compare',
+    component: () => import('@/pages/projects/ComparePage.vue'),
+    meta: { title: 'titles.compare' },
+  },
+  {
     path: '/projects/:id',
     name: 'project-detail',
     component: () => import('@/pages/projects/ProjectDetailPage.vue'),

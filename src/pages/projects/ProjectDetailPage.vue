@@ -5,6 +5,7 @@ import { useRoute, RouterLink, useRouter } from 'vue-router'
 import { PhCalendar, PhCaretRight, PhCurrencyCircleDollar, PhMapPin, PhPencilSimple, PhTrash, PhUser } from '@phosphor-icons/vue'
 import BaseBadge from '@/components/common/BaseBadge.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
+import CompareCheckbox from '@/components/compare/CompareCheckbox.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
 import InfrastructureCard from '@/components/cards/InfrastructureCard.vue'
 import EmptyState from '@/components/tables/EmptyState.vue'
@@ -87,11 +88,14 @@ onMounted(async () => { await fetchProject(); fetchInfras() })
         </div>
 
         <!-- Actions -->
-        <div v-if="canEdit" class="flex gap-2 mb-6">
+        <div class="mb-6 flex flex-wrap gap-2">
+          <CompareCheckbox :project="project" />
+          <template v-if="canEdit">
           <RouterLink :to="`/projects/${project.id}/edit`">
             <BaseButton variant="secondary" size="sm"><template #iconLeft><PhPencilSimple :size="14" weight="light" /></template>{{ t('common.edit') }}</BaseButton>
           </RouterLink>
           <BaseButton variant="danger" size="sm" @click="showDeleteModal = true"><template #iconLeft><PhTrash :size="14" weight="light" /></template>{{ t('common.delete') }}</BaseButton>
+          </template>
         </div>
 
         <!-- Info grid -->
