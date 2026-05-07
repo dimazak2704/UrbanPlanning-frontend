@@ -8,8 +8,11 @@ import BaseButton from '@/components/common/BaseButton.vue'
 import CompareCheckbox from '@/components/compare/CompareCheckbox.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
 import InfrastructureCard from '@/components/cards/InfrastructureCard.vue'
+import StreetViewPanorama from '@/components/common/StreetViewPanorama.vue'
 import EmptyState from '@/components/tables/EmptyState.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { getProjectById, deleteProject } from '@/api/projects.api'
 import { getInfrastructures } from '@/api/infrastructures.api'
 import { useAuthStore } from '@/stores/auth.store'
@@ -29,10 +32,23 @@ const loading = ref(true)
 const project = ref<Project | null>(null)
 const infras = ref<Infrastructure[]>([])
 const showDeleteModal = ref(false)
+const mapContainer = ref<HTMLDivElement | null>(null)
+let map: L.Map | null = null
+
 const canEdit = computed(() => {
   if (!auth.user || !project.value) return false
   return auth.isAdmin || auth.user.id === project.value.architectId
 })
+
+function initMap() {
+  if (!mapContainer.value || !project.value) return
+  if (!project.value.latitude || !project.value.longitude) return
+  map = L.map(mapContainer.value).setView([project.value.latitude, project.value.longitude], 14)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+  }).addTo(map)
+  L.marker([project.value.latitude, project.value.longitude]).addTo(map).bindPopup(`<b>${project.value.name}</b>`)
+}
 
 async function fetchProject() {
   loading.value = true
@@ -58,7 +74,7 @@ async function handleDelete() {
   } catch (err) { toast.error(err instanceof Error ? err.message : t('projects.deleteError')) }
 }
 
-onMounted(async () => { await fetchProject(); fetchInfras() })
+onMounted(async () => { await fetchProject(); fetchInfras(); setTimeout(initMap, 100) })
 </script>
 
 <template>
@@ -136,8 +152,22 @@ onMounted(async () => { await fetchProject(); fetchInfras() })
           </div>
         </div>
 
+        <div v-if="project.latitude && project.longitude">
+          <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">— 01 {{ t('cities.map') }}</p>
+          <h2 class="mt-3 mb-4 text-xl font-semibold text-ink dark:text-paper">{{ t('cities.map') }}</h2>
+          <div ref="mapContainer" class="z-0 h-72 overflow-hidden rounded-xl border border-ink/15 dark:border-night-border" />
+        </div>
+
+        <!-- Street View -->
+        <StreetViewPanorama
+          v-if="project.latitude != null && project.longitude != null"
+          :latitude="project.latitude"
+          :longitude="project.longitude"
+          section-number="02"
+        />
+
         <!-- Infrastructure -->
-        <div>
+        <div class="mt-14">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-ink dark:text-paper">{{ t('projects.infrastructures', { count: infras.length }) }}</h2>
             <RouterLink v-if="canEdit" :to="`/infrastructures/new?projectId=${project.id}`"

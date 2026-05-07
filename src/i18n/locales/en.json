@@ -550,6 +550,18 @@
     "networkError": "Network error",
     "pageNotFound": "Page not found"
   },
+  "streetView": {
+    "sectionMeta": "STREET VIEW",
+    "title": "Real Location View",
+    "hint": "Interactive Google Maps panorama. Rotate the camera to look around.",
+    "iframeTitle": "Google Street View location panorama",
+    "openInMaps": "Open in Google Maps",
+    "coordinates": "Coordinates",
+    "unavailable": {
+      "title": "Street View is unavailable",
+      "description": "A Google Maps API key is required to display the panorama. Please contact the administrator."
+    }
+  },
   "pagination": {
     "showing": "Showing {from}–{to} of {total}",
     "perPage": "Per",

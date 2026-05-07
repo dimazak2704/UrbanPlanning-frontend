@@ -9,6 +9,7 @@ import BaseBadge from '@/components/common/BaseBadge.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import ImageWithFallback from '@/components/common/ImageWithFallback.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import StreetViewPanorama from '@/components/common/StreetViewPanorama.vue'
 import { getInfrastructureById, deleteInfrastructure } from '@/api/infrastructures.api'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
@@ -117,9 +118,18 @@ onMounted(async () => { await fetchItem(); setTimeout(initMap, 100) })
           </div>
         </div>
         <div v-if="item.latitude && item.longitude">
-          <h2 class="mb-4 text-xl font-semibold text-ink dark:text-paper">{{ t('cities.map') }}</h2>
+          <p class="text-xs font-mono uppercase tracking-[0.2em] text-ink-muted dark:text-paper/65">— 01 {{ t('cities.map') }}</p>
+          <h2 class="mt-3 mb-4 text-xl font-semibold text-ink dark:text-paper">{{ t('cities.map') }}</h2>
           <div ref="mapContainer" class="z-0 h-72 overflow-hidden rounded-xl border border-ink/15 dark:border-night-border" />
         </div>
+
+        <!-- Street View -->
+        <StreetViewPanorama
+          v-if="item.latitude != null && item.longitude != null"
+          :latitude="item.latitude"
+          :longitude="item.longitude"
+          section-number="02"
+        />
       </div>
       <teleport to="body">
         <div v-if="showDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">

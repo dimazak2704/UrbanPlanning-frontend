@@ -18,7 +18,8 @@ const dragOver = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_SIZE = 5 * 1024 * 1024
+const MAX_SIZE = computed(() => props.endpoint === 'avatars' ? 100 * 1024 * 1024 : 5 * 1024 * 1024)
+const maxSizeLabel = computed(() => props.endpoint === 'avatars' ? '100 МБ' : '5 МБ')
 
 const uploadFn = {
   avatars: uploadAvatar,
@@ -33,8 +34,8 @@ async function handleFile(file: File) {
     toast.error('Дозволено лише JPG, PNG, WebP')
     return
   }
-  if (file.size > MAX_SIZE) {
-    toast.error('Розмір файлу не повинен перевищувати 5 МБ')
+  if (file.size > MAX_SIZE.value) {
+    toast.error(`Розмір файлу не повинен перевищувати ${maxSizeLabel.value}`)
     return
   }
   uploading.value = true
@@ -87,7 +88,7 @@ function removeImage() {
           <PhUploadSimple :size="28" weight="light" class="text-ink-muted dark:text-paper/65" />
         </div>
         <p class="text-sm font-mono uppercase tracking-[0.16em] text-ink dark:text-paper">Перетягніть фото або натисніть</p>
-        <p class="text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">JPG, PNG, WebP до 5 МБ</p>
+        <p class="text-xs font-mono uppercase tracking-wider text-ink-muted dark:text-paper/65">JPG, PNG, WebP до {{ maxSizeLabel }}</p>
       </div>
     </div>
   </div>

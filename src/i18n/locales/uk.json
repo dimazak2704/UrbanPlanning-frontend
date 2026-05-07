@@ -550,6 +550,18 @@
     "networkError": "Помилка мережі",
     "pageNotFound": "Сторінку не знайдено"
   },
+  "streetView": {
+    "sectionMeta": "STREET VIEW",
+    "title": "Реальний вигляд місцевості",
+    "hint": "Інтерактивна панорама з Google Maps. Крутіть камеру, щоб роздивитись оточення.",
+    "iframeTitle": "Google Street View панорама локації",
+    "openInMaps": "Відкрити в Google Maps",
+    "coordinates": "Координати",
+    "unavailable": {
+      "title": "Street View недоступний",
+      "description": "Для відображення панорами потрібен Google Maps API ключ. Зверніться до адміністратора."
+    }
+  },
   "pagination": {
     "showing": "Показано {from}–{to} з {total}",
     "perPage": "По",

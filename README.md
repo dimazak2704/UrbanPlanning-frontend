@@ -36,6 +36,17 @@ npm run dev
 VITE_API_BASE_URL=http://localhost:8080/api
 ```
 
+### Google Maps Street View
+Для роботи інтерактивних панорам Street View потрібен API ключ Google Maps.
+
+1. Створіть проект на https://console.cloud.google.com/
+2. Увімкніть Maps Embed API
+3. Створіть API key у розділі Credentials
+4. Обмежте ключ: HTTP referrers = `http://localhost:*`
+5. Додайте ключ у `.env`: `VITE_GOOGLE_MAPS_API_KEY=your_key_here`
+6. Перезапустіть dev-сервер (`npm run dev`)
+
+
 ## Тестові дані
 
 Якщо ви використовуєте тестову базу даних на бекенді, ви можете залогінитись під такими користувачами:
