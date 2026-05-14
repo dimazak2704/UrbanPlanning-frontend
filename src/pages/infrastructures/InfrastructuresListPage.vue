@@ -20,6 +20,7 @@ import { useToastStore } from '@/stores/toast.store'
 import { INFRASTRUCTURE_TYPE_LABELS, INFRASTRUCTURE_STATUS_LABELS } from '@/utils/enum-labels'
 import type { Infrastructure, InfrastructureFilters } from '@/types/infrastructure'
 import { INFRASTRUCTURE_STATUS_VALUES, INFRASTRUCTURE_TYPE_VALUES } from '@/types/enums'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -47,7 +48,7 @@ async function fetchItems() {
     const { data } = await getInfrastructures(debouncedFilters.value, { page: pagination.page.value, size: pagination.size.value, sort: sort.value })
     items.value = data.content
     pagination.updateFromResponse(data)
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('infrastructures.loadError')) }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('infrastructures.loadError'))) }
   finally { pagination.loading.value = false }
 }
 

@@ -16,6 +16,7 @@ import { useToastStore } from '@/stores/toast.store'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { getInfrastructureStatusColor } from '@/utils/enum-labels'
 import type { Infrastructure } from '@/types/infrastructure'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,7 +40,7 @@ const canModify = computed(() => {
 async function fetchItem() {
   loading.value = true
   try { const { data } = await getInfrastructureById(itemId.value); item.value = data }
-  catch (err) { toast.error(err instanceof Error ? err.message : t('infrastructures.loadError')); router.push('/infrastructures') }
+  catch (err) { toast.error(getApiErrorMessage(err, t('infrastructures.loadError'))); router.push('/infrastructures') }
   finally { loading.value = false }
 }
 
@@ -55,7 +56,7 @@ function initMap() {
 
 async function handleDelete() {
   try { await deleteInfrastructure(itemId.value); toast.success(t('infrastructures.deleteSuccess')); router.push('/infrastructures') }
-  catch (err) { toast.error(err instanceof Error ? err.message : t('infrastructures.deleteError')) }
+  catch (err) { toast.error(getApiErrorMessage(err, t('infrastructures.deleteError'))) }
 }
 
 onMounted(async () => { await fetchItem(); setTimeout(initMap, 100) })

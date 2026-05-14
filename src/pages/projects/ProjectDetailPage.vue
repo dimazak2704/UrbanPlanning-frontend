@@ -21,6 +21,7 @@ import { formatCurrency, formatDate } from '@/utils/format'
 import { getProjectStatusColor } from '@/utils/enum-labels'
 import type { Project } from '@/types/project'
 import type { Infrastructure } from '@/types/infrastructure'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -55,7 +56,7 @@ async function fetchProject() {
   try {
     const { data } = await getProjectById(projectId.value)
     project.value = data
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('projects.loadError')); router.push('/projects') }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('projects.loadError'))); router.push('/projects') }
   finally { loading.value = false }
 }
 
@@ -71,7 +72,7 @@ async function handleDelete() {
     await deleteProject(projectId.value)
     toast.success(t('projects.deleteSuccess'))
     router.push('/projects')
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('projects.deleteError')) }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('projects.deleteError'))) }
 }
 
 onMounted(async () => { await fetchProject(); fetchInfras(); setTimeout(initMap, 100) })

@@ -19,6 +19,7 @@ import { usePagination } from '@/composables/usePagination'
 import { useDebounce } from '@/composables/useDebounce'
 import { useToastStore } from '@/stores/toast.store'
 import type { City, CityCreateRequest, CityFilters } from '@/types/city'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const toast = useToastStore()
 const { t } = useI18n()
@@ -44,8 +45,8 @@ async function fetchCities() {
     const { data } = await getCities(debouncedFilters.value, { page: pagination.page.value, size: pagination.size.value, sort: sort.value })
     cities.value = data.content
     pagination.updateFromResponse(data)
-  } catch {
-    toast.error(t('cities.loadError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('cities.loadError')))
   } finally {
     loading.value = false
   }
@@ -98,8 +99,8 @@ async function handleSave() {
     }
     showModal.value = false
     fetchCities()
-  } catch {
-    toast.error(t('cities.saveError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('cities.saveError')))
   } finally {
     saving.value = false
   }
@@ -114,8 +115,8 @@ async function confirmDelete() {
     toast.success(t('cities.deleteSuccess'))
     if (cities.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchCities()
-  } catch {
-    toast.error(t('cities.deleteError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('cities.deleteError')))
   } finally {
     itemToDelete.value = null
   }

@@ -20,6 +20,7 @@ import { getDistrictTypeColor } from '@/utils/enum-labels'
 
 import type { District } from '@/types/district'
 import type { Project } from '@/types/project'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -43,7 +44,7 @@ async function fetchDistrict() {
     const { data } = await getDistrictById(districtId.value)
     district.value = data
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : t('districts.loadError'))
+    toast.error(getApiErrorMessage(err, t('districts.loadError')))
     router.push('/cities')
   } finally {
     loading.value = false

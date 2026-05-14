@@ -14,6 +14,7 @@ import { useToastStore } from '@/stores/toast.store'
 import { formatDate } from '@/utils/format'
 import type { Architect } from '@/types/architect'
 import type { Project } from '@/types/project'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -30,7 +31,7 @@ const projTotalElements = ref(0)
 async function fetchArchitect() {
   loading.value = true
   try { const { data } = await getArchitectById(archId.value); architect.value = data }
-  catch (err) { toast.error(err instanceof Error ? err.message : t('architects.loadError')); router.push('/architects') }
+  catch (err) { toast.error(getApiErrorMessage(err, t('architects.loadError'))); router.push('/architects') }
   finally { loading.value = false }
 }
 

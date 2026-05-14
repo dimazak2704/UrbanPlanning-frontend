@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { PhBuildings } from '@phosphor-icons/vue'
 import { useI18n } from 'vue-i18n'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const router = useRouter()
 const route = useRoute()
@@ -35,7 +36,7 @@ async function handleLogin() {
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (err) {
-    const message = err instanceof Error ? err.message : t('auth.loginError')
+    const message = getApiErrorMessage(err, t('auth.loginError'))
     errorMessage.value = message
     toast.error(message)
   } finally {

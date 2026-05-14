@@ -20,6 +20,7 @@ import {
   type InfrastructureType,
   type InfrastructureStatus,
 } from '@/types/enums'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,7 +70,7 @@ async function onSubmit() {
     if (isEdit.value) { await updateInfrastructure(itemId.value, form.value); toast.success(t('infrastructures.updateSuccess')) }
     else { const { data } = await createInfrastructure(form.value); toast.success(t('infrastructures.createSuccess')); router.push(`/infrastructures/${data.id}`); return }
     router.push(`/infrastructures/${itemId.value}`)
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('infrastructures.saveError')) }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('infrastructures.saveError'))) }
   finally { saving.value = false }
 }
 
@@ -103,7 +104,7 @@ onMounted(async () => {
         location.value = { lat: data.latitude, lng: data.longitude }
         focusLocation.value = { lat: data.latitude, lng: data.longitude }
       }
-    } catch { toast.error(t('infrastructures.loadError')); router.push('/infrastructures') }
+    } catch (err) { toast.error(getApiErrorMessage(err, t('infrastructures.loadError'))); router.push('/infrastructures') }
   }
   loading.value = false
 })

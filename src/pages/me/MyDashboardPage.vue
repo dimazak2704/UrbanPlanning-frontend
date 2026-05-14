@@ -28,6 +28,7 @@ import type { MeStats } from '@/types/me'
 import type { OverviewStats } from '@/types/analytics'
 import type { Project } from '@/types/project'
 import type { ProjectStatus } from '@/types/enums'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -61,7 +62,7 @@ async function fetchArchitectData() {
     stats.value = statsRes.data
     recentProjects.value = projectsRes.data.content
   } catch (err) {
-    toast.error(t('me.statsLoadError'))
+    toast.error(getApiErrorMessage(err, t('me.statsLoadError')))
   }
 }
 
@@ -70,7 +71,7 @@ async function fetchAdminData() {
     const { data } = await getOverview()
     overview.value = data
   } catch (err) {
-    toast.error(t('admin.statsLoadError'))
+    toast.error(getApiErrorMessage(err, t('admin.statsLoadError')))
   }
 }
 

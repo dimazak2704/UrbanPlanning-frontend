@@ -22,6 +22,7 @@ import { formatCurrency, formatDate } from '@/utils/format'
 import { INFRASTRUCTURE_STATUS_VALUES, INFRASTRUCTURE_TYPE_VALUES, type InfrastructureStatus, type InfrastructureType } from '@/types/enums'
 import { INFRASTRUCTURE_STATUS_LABELS, INFRASTRUCTURE_TYPE_LABELS, getInfrastructureStatusColor } from '@/utils/enum-labels'
 import type { Infrastructure, InfrastructureFilters } from '@/types/infrastructure'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const { t } = useI18n()
 const toast = useToastStore()
@@ -81,8 +82,8 @@ async function fetchItems() {
     })
     items.value = data.content
     pagination.updateFromResponse(data)
-  } catch {
-    toast.error(t('infrastructures.loadError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('infrastructures.loadError')))
   } finally {
     loading.value = false
   }
@@ -104,8 +105,8 @@ async function confirmDelete() {
     toast.success(t('infrastructures.deleteSuccess'))
     if (items.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchItems()
-  } catch {
-    toast.error(t('infrastructures.deleteError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('infrastructures.deleteError')))
   } finally {
     itemToDelete.value = null
   }

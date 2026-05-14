@@ -23,6 +23,7 @@ import { formatCurrency, formatDate } from '@/utils/format'
 import { PROJECT_STATUS_LABELS, getProjectStatusColor } from '@/utils/enum-labels'
 import { PROJECT_STATUS_VALUES, type ProjectStatus } from '@/types/enums'
 import type { Project, ProjectFilters } from '@/types/project'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const { t } = useI18n()
 const toast = useToastStore()
@@ -75,8 +76,8 @@ async function fetchProjects() {
     })
     projects.value = data.content
     pagination.updateFromResponse(data)
-  } catch {
-    toast.error(t('projects.loadError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('projects.loadError')))
   } finally {
     loading.value = false
   }
@@ -102,8 +103,8 @@ async function confirmDelete() {
     toast.success(t('projects.deleteSuccess'))
     if (projects.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchProjects()
-  } catch {
-    toast.error(t('projects.deleteError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('projects.deleteError')))
   } finally {
     projectToDelete.value = null
   }

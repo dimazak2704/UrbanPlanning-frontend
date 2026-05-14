@@ -13,6 +13,7 @@ import { usePagination } from '@/composables/usePagination'
 import { useFilters } from '@/composables/useFilters'
 import { useToastStore } from '@/stores/toast.store'
 import type { Architect, ArchitectFilters } from '@/types/architect'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const toast = useToastStore()
 const { t } = useI18n()
@@ -32,7 +33,7 @@ async function fetchArchitects() {
     const { data } = await getArchitects(debouncedFilters.value, { page: pagination.page.value, size: pagination.size.value, sort: sort.value })
     architects.value = data.content
     pagination.updateFromResponse(data)
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('architects.loadError')) }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('architects.loadError'))) }
   finally { pagination.loading.value = false }
 }
 

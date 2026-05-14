@@ -23,6 +23,7 @@ import { useDebounce } from '@/composables/useDebounce'
 import { useToastStore } from '@/stores/toast.store'
 import type { District, DistrictCreateRequest, DistrictFilters } from '@/types/district'
 import type { DistrictType } from '@/types/enums'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const toast = useToastStore()
 const { t } = useI18n()
@@ -69,8 +70,8 @@ async function fetchDistricts() {
     const { data } = await getDistricts(debouncedFilters.value, { page: pagination.page.value, size: pagination.size.value, sort: sort.value })
     districts.value = data.content
     pagination.updateFromResponse(data)
-  } catch {
-    toast.error(t('districts.loadError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('districts.loadError')))
   } finally {
     loading.value = false
   }
@@ -138,8 +139,8 @@ async function handleSave() {
     }
     showModal.value = false
     fetchDistricts()
-  } catch {
-    toast.error(t('districts.saveError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('districts.saveError')))
   } finally {
     saving.value = false
   }
@@ -154,8 +155,8 @@ async function confirmDelete() {
     toast.success(t('districts.deleteSuccess'))
     if (districts.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchDistricts()
-  } catch {
-    toast.error(t('districts.deleteError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('districts.deleteError')))
   } finally {
     itemToDelete.value = null
   }

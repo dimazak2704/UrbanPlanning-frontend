@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { useI18n } from 'vue-i18n'
 import BaseInput from '@/components/common/BaseInput.vue'
+import PhoneInput from '@/components/common/PhoneInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import ImageUploader from '@/components/forms/ImageUploader.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
@@ -12,6 +13,7 @@ import { useToastStore } from '@/stores/toast.store'
 import { formatDate } from '@/utils/format'
 import { ROLE_LABELS } from '@/utils/enum-labels'
 import type { Me, UpdateMeRequest, ChangePasswordRequest } from '@/types/me'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -48,8 +50,8 @@ async function fetchProfile() {
     originalProfile.value = { ...profileForm.value }
     avatarUrl.value = data.avatarUrl || null
     avatarInitialized.value = true
-  } catch {
-    toast.error(t('me.profileLoadError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('me.profileLoadError')))
   }
 }
 
@@ -66,9 +68,9 @@ watch(avatarUrl, async (next, prev) => {
     profile.value = data
     avatarUrl.value = data.avatarUrl || null
     toast.success(t('me.profileSaved'))
-  } catch {
+  } catch (err) {
     avatarUrl.value = prev ?? null
-    toast.error(t('me.profileSaveError'))
+    toast.error(getApiErrorMessage(err, t('me.profileSaveError')))
   } finally {
     avatarSaving.value = false
   }
@@ -101,8 +103,8 @@ async function saveProfile() {
     profile.value = data
     originalProfile.value = { ...profileForm.value }
     toast.success(t('me.profileSaved'))
-  } catch {
-    toast.error(t('me.profileSaveError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('me.profileSaveError')))
   } finally {
     profileSaving.value = false
   }
@@ -123,9 +125,8 @@ async function savePwd() {
     toast.success(t('me.passwordChanged'))
     pwdForm.value = { currentPassword: '', newPassword: '' }
     confirmPwd.value = ''
-  } catch (err: any) {
-    if (err.response?.status === 400) toast.error(t('me.wrongCurrentPassword'))
-    else toast.error(t('me.passwordChangeError'))
+  } catch (err: unknown) {
+    toast.error(getApiErrorMessage(err, t('me.passwordChangeError')))
   } finally {
     pwdSaving.value = false
   }
@@ -137,8 +138,8 @@ async function handleDeleteAvatar() {
     avatarUrl.value = null
     toast.success(t('me.avatarDeleted'))
     showAvatarDelete.value = false
-  } catch {
-    toast.error(t('me.avatarDeleteError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('me.avatarDeleteError')))
   }
 }
 </script>
@@ -189,7 +190,7 @@ async function handleDeleteAvatar() {
                 <BaseInput v-model="profileForm.specialization" :label="t('me.specializationLabel')" />
                 <BaseInput v-model="profileForm.experienceYears" type="number" min="1" :label="t('me.experienceLabel')" :error="profileErrors.experienceYears" />
               </div>
-              <BaseInput v-model="profileForm.phoneNumber" :label="t('me.phoneLabel')" />
+              <PhoneInput v-model="profileForm.phoneNumber" :label="t('me.phoneLabel')" />
               <div>
                 <label class="mb-2 block text-xs font-mono uppercase tracking-widest text-ink-muted dark:text-paper/65">{{ t('me.bioLabel') }}</label>
                 <textarea v-model="profileForm.bio" rows="4" class="w-full border-b border-ink/20 bg-transparent px-0 py-3 text-base text-ink focus:border-ink focus:outline-none resize-none dark:border-paper/30 dark:text-paper dark:focus:border-paper" />

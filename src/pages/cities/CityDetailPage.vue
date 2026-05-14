@@ -27,6 +27,7 @@ import type { City } from '@/types/city'
 import type { District } from '@/types/district'
 import type { Project } from '@/types/project'
 import type { ProjectStatus } from '@/types/enums'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -62,7 +63,7 @@ async function fetchCity() {
     const { data } = await getCityById(cityId.value)
     city.value = data
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : t('cities.loadError'))
+    toast.error(getApiErrorMessage(err, t('cities.loadError')))
     router.push('/cities')
   } finally {
     loading.value = false

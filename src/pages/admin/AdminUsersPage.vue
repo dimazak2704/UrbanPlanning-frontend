@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { PhPencilSimple, PhPlus, PhTrash, PhUserCircle } from '@phosphor-icons/vue'
 import BaseButton from '@/components/common/BaseButton.vue'
+import PhoneInput from '@/components/common/PhoneInput.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import BaseBadge from '@/components/common/BaseBadge.vue'
@@ -20,6 +21,7 @@ import { usePagination } from '@/composables/usePagination'
 import { useDebounce } from '@/composables/useDebounce'
 import { useToastStore } from '@/stores/toast.store'
 import { formatDate } from '@/utils/format'
+import { getApiErrorMessage } from '@/utils/api-error'
 import type { User, CreateUserRequest, UpdateUserRequest } from '@/types/user'
 import { ROLE_VALUES } from '@/types/enums'
 
@@ -51,7 +53,7 @@ async function fetchUsers() {
     users.value = data.content
     pagination.updateFromResponse(data)
   } catch (err) {
-    toast.error(t('admin.userLoadError'))
+    toast.error(getApiErrorMessage(err, t('admin.userLoadError')))
   } finally {
     loading.value = false
   }
@@ -106,7 +108,7 @@ async function handleSave() {
     showModal.value = false
     fetchUsers()
   } catch (err) {
-    toast.error(t('admin.userSaveError'))
+    toast.error(getApiErrorMessage(err, t('admin.userSaveError')))
   } finally {
     saving.value = false
   }
@@ -121,8 +123,8 @@ async function confirmDelete() {
     toast.success(t('admin.userDeleted'))
     if (users.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchUsers()
-  } catch {
-    toast.error(t('admin.userDeleteError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('admin.userDeleteError')))
   } finally {
     userToDelete.value = null
   }
@@ -133,8 +135,8 @@ async function toggleActive(user: User) {
     await updateUser(user.id, { active: !user.active } as UpdateUserRequest)
     user.active = !user.active
     toast.success(t('admin.statusChanged', { status: user.active ? t('admin.activeLabel') : t('admin.inactiveLabel') }))
-  } catch {
-    toast.error(t('admin.statusChangeError'))
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, t('admin.statusChangeError')))
   }
 }
 </script>
@@ -236,7 +238,7 @@ async function toggleActive(user: User) {
             <label class="mb-2 block text-sm font-medium text-ink dark:text-paper">{{ t('admin.statusToggle') }}</label>
             <label class="flex items-center cursor-pointer">
               <input type="checkbox" v-model="form.active" class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+              <div class="relative w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
               <span class="ml-3 text-sm font-medium text-ink dark:text-paper">{{ form.active ? t('admin.activeLabel') : t('admin.inactiveLabel') }}</span>
             </label>
           </div>
@@ -254,7 +256,7 @@ async function toggleActive(user: User) {
               <BaseInput v-model="form.specialization" :label="t('admin.specializationLabel')" />
               <BaseInput v-model="form.experienceYears" type="number" min="1" :label="t('admin.experienceLabel')" />
             </div>
-            <BaseInput v-model="form.phoneNumber" :label="t('admin.phoneLabel')" class="mb-4" />
+            <PhoneInput v-model="form.phoneNumber" :label="t('admin.phoneLabel')" class="mb-4" />
             <div class="mb-4">
               <label class="mb-1 block text-sm font-medium text-ink dark:text-paper">{{ t('admin.bioLabel') }}</label>
               <textarea v-model="form.bio" rows="3" maxlength="5000" :placeholder="t('admin.bioPlaceholder')"

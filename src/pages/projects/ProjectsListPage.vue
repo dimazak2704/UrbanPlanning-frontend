@@ -22,6 +22,7 @@ import { useToastStore } from '@/stores/toast.store'
 import { PROJECT_STATUS_LABELS } from '@/utils/enum-labels'
 import { PROJECT_STATUS_VALUES } from '@/types/enums'
 import type { Project, ProjectFilters } from '@/types/project'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -66,7 +67,7 @@ async function fetchProjects() {
     const { data } = await getProjects(f as ProjectFilters, { page: pagination.page.value, size: pagination.size.value, sort: sort.value })
     projects.value = data.content
     pagination.updateFromResponse(data)
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('projects.loadError')) }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('projects.loadError'))) }
   finally { pagination.loading.value = false }
 }
 

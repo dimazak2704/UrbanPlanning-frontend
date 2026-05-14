@@ -18,6 +18,7 @@ import { usePagination } from '@/composables/usePagination'
 import { useDebounce } from '@/composables/useDebounce'
 import { useToastStore } from '@/stores/toast.store'
 import type { Project, ProjectFilters } from '@/types/project'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const router = useRouter()
 const toast = useToastStore()
@@ -58,7 +59,7 @@ async function fetchProjects() {
     projects.value = data.content
     pagination.updateFromResponse(data)
   } catch (err) {
-    toast.error(t('projects.loadError'))
+    toast.error(getApiErrorMessage(err, t('projects.loadError')))
   } finally {
     loading.value = false
   }
@@ -98,7 +99,7 @@ async function confirmDelete() {
     if (projects.value.length === 1 && pagination.page.value > 0) pagination.page.value--
     else fetchProjects()
   } catch (err) {
-    toast.error(t('projects.deleteError'))
+    toast.error(getApiErrorMessage(err, t('projects.deleteError')))
   } finally {
     projectToDelete.value = null
   }

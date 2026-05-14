@@ -17,6 +17,7 @@ import { useToastStore } from '@/stores/toast.store'
 import { PROJECT_STATUS_LABELS } from '@/utils/enum-labels'
 import type { ProjectCreateRequest } from '@/types/project'
 import { PROJECT_STATUS_VALUES, type ProjectStatus } from '@/types/enums'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const route = useRoute()
 const router = useRouter()
@@ -89,7 +90,7 @@ async function onSubmit() {
       return
     }
     router.push(`/projects/${projectId.value}`)
-  } catch (err) { toast.error(err instanceof Error ? err.message : t('projects.saveError')) }
+  } catch (err) { toast.error(getApiErrorMessage(err, t('projects.saveError'))) }
   finally { saving.value = false }
 }
 
@@ -154,7 +155,7 @@ onMounted(async () => {
         location.value = { lat: data.latitude, lng: data.longitude }
         focusLocation.value = { lat: data.latitude, lng: data.longitude }
       }
-    } catch (err) { toast.error(t('projects.loadError')); router.push('/projects') }
+    } catch (err) { toast.error(getApiErrorMessage(err, t('projects.loadError'))); router.push('/projects') }
   }
   loading.value = false
 })

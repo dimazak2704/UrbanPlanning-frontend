@@ -43,7 +43,7 @@ function goToProject(id: number) {
               </p>
             </div>
 
-            <div class="flex max-w-[60vw] gap-2 overflow-x-auto pb-1">
+            <div class="flex max-w-[60vw] gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <div
                 v-for="project in selectedProjects"
                 :key="project.id"

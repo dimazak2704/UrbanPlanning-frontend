@@ -19,6 +19,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import type { City } from '@/types/city'
 import type { CityFilters } from '@/types/city'
+import { getApiErrorMessage } from '@/utils/api-error'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -57,7 +58,7 @@ async function fetchCities() {
     cities.value = data.content
     pagination.updateFromResponse(data)
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : t('cities.loadError'))
+    toast.error(getApiErrorMessage(err, t('cities.loadError')))
   } finally {
     pagination.loading.value = false
   }
